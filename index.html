@@ -1,0 +1,2943 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>E-LKPD Interaktif: Larutan Elektrolit & Non-Elektrolit (Guided Inquiry)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#4f46e5',
+              600: '#4338ca',
+              700: '#3730a3',
+              900: '#1e1b4b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Animasi Gelembung Gas pada Elektroda */
+    @keyframes bubbleRise {
+      0% {
+        transform: translateY(0) scale(0.7);
+        opacity: 0.9;
+      }
+      70% {
+        opacity: 0.85;
+      }
+      100% {
+        transform: translateY(-58px) scale(1.15);
+        opacity: 0;
+      }
+    }
+
+    .bubble-anim {
+      animation: bubbleRise 1.6s infinite ease-in;
+    }
+    .bubble-anim-slow {
+      animation: bubbleRise 2.6s infinite ease-in;
+    }
+
+    /* Efek Cahaya Lampu Bohlam */
+    @keyframes pulseBright {
+      0%, 100% {
+        filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.95)) drop-shadow(0 0 28px rgba(234, 179, 8, 0.8));
+      }
+      50% {
+        filter: drop-shadow(0 0 22px rgba(250, 204, 21, 1)) drop-shadow(0 0 38px rgba(245, 158, 11, 0.95));
+      }
+    }
+
+    @keyframes pulseDim {
+      0%, 100% {
+        filter: drop-shadow(0 0 5px rgba(253, 224, 71, 0.55));
+      }
+      50% {
+        filter: drop-shadow(0 0 9px rgba(250, 204, 21, 0.75));
+      }
+    }
+
+    .glow-bright {
+      animation: pulseBright 1.5s infinite ease-in-out;
+    }
+    .glow-dim {
+      animation: pulseDim 2s infinite ease-in-out;
+    }
+
+    /* Animasi Gerak Ion Bebas */
+    @keyframes floatParticle {
+      0%, 100% { transform: translate(0px, 0px); }
+      25% { transform: translate(5px, -4px); }
+      50% { transform: translate(-4px, 5px); }
+      75% { transform: translate(-5px, -3px); }
+    }
+    .ion-particle {
+      animation: floatParticle 2.4s infinite ease-in-out;
+    }
+
+    /* Hide scrollbar for step pills on mobile */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-24">
+
+  <!-- ================= HEADER STICKY MOBILE-FIRST ================= -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-xl mx-auto px-4 py-2.5">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <!-- Secret Researcher Trigger: Ketuk 5x pada ikon lab di pojok kiri atas untuk membuka Panel Peneliti -->
+          <div onclick="handleSecretResearcherTrigger()" class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-sm shrink-0 cursor-pointer select-none active:scale-95 transition" title="E-LKPD Kimia">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Guided Inquiry</span>
+              <span id="lockedBadge" class="hidden text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                🔒 Terkirim
+              </span>
+            </div>
+            <h1 class="text-sm font-extrabold text-slate-800 leading-tight mt-0.5">E-LKPD Larutan Elektrolit</h1>
+          </div>
+        </div>
+
+        <!-- Badge Status Koneksi Cloud Otomatis (Tombol Apps Script disembunyikan dari siswa) -->
+        <div class="flex items-center gap-1.5">
+          <span class="px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="hidden sm:inline">Auto-Sync Aktif</span>
+            <span class="sm:hidden">Online</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Info Siswa Aktif + Progress Bar -->
+      <div id="studentHeaderBar" class="hidden mt-2 pt-2 border-t border-slate-100">
+        <div class="flex items-center justify-between text-xs text-slate-600 mb-1.5">
+          <div class="truncate font-medium flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span id="headerStudentName" class="font-bold text-slate-800">-</span>
+            <span class="mx-1 text-slate-300">|</span>
+            <span id="headerStudentClass">-</span>
+          </div>
+          <span id="progressPercentText" class="font-bold text-indigo-600 shrink-0">Tahap 1/6</span>
+        </div>
+        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div id="topProgressBar" class="h-full bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-full transition-all duration-300" style="width: 14%"></div>
+        </div>
+
+        <!-- Navigasi Sintaks (Step Pills dengan Lambang tiap Sintaks) -->
+        <div id="stepPillsContainer" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar mt-2.5 pb-0.5">
+          <button type="button" onclick="goToStep(1)" id="pill-1" class="step-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+            <span>👁️</span><span>1. Orientasi</span>
+          </button>
+          <button type="button" onclick="goToStep(2)" id="pill-2" class="step-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+            <span>❓</span><span>2. Masalah</span>
+          </button>
+          <button type="button" onclick="goToStep(3)" id="pill-3" class="step-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+            <span>💡</span><span>3. Hipotesis</span>
+          </button>
+          <button type="button" onclick="goToStep(4)" id="pill-4" class="step-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+            <span>🧪</span><span>4. Data Lab</span>
+          </button>
+          <button type="button" onclick="goToStep(5)" id="pill-5" class="step-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+            <span>📝</span><span>5. Uji &amp; Kuis (20)</span>
+          </button>
+          <button type="button" onclick="goToStep(6)" id="pill-6" class="step-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+            <span>🏁</span><span>6. Kesimpulan</span>
+          </button>
+          <button type="button" onclick="goToStep(7)" id="pill-7" class="step-pill hidden shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+            <span>🏆</span><span>Hasil Akhir</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= KONTainer UTAMA (MOBILE VIEWPORT OPTIMIZED) ================= -->
+  <main class="max-w-xl w-full mx-auto px-4 pt-4 pb-8 flex-1">
+
+    <!-- Notifikasi Toast Inline -->
+    <div id="toastBanner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[92%] bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-3 transition-all">
+      <i id="toastIcon" class="fa-solid fa-circle-exclamation text-amber-400 text-lg shrink-0"></i>
+      <p id="toastMessage" class="text-xs font-medium leading-snug flex-1"></p>
+      <button onclick="hideToast()" class="text-slate-400 hover:text-white text-xs font-bold px-1">Tutup</button>
+    </div>
+
+    <!-- =====================================================================
+         TAHAP 0: HALAMAN IDENTITAS SISWA (HALAMAN AWAL)
+    ====================================================================== -->
+    <section id="step-0" class="step-section space-y-4">
+      <!-- Banner Hero E-LKPD -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-700 to-cyan-600 text-white p-6 shadow-lg">
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-xs font-semibold mb-3 border border-white/20">
+            <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
+            <span>Kimia SMA/MA Kelas X/XI • Inkuiri Terbimbing</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-extrabold leading-tight">
+            E-LKPD Interaktif: Larutan Elektrolit & Non-Elektrolit
+          </h2>
+          <p class="text-xs sm:text-sm text-indigo-100 mt-2 leading-relaxed">
+            Temukan konsep daya hantar listrik larutan, reaksi ionisasi Arrhenius, dan pengaruh ikatan kimia melalui tahapan penyelidikan ilmiah berbasis <strong>Guided Inquiry Learning</strong>.
+          </p>
+        </div>
+        <!-- Dekorasi Latar -->
+        <div class="absolute -right-8 -bottom-8 w-36 h-36 rounded-full bg-cyan-400/20 blur-xl pointer-events-none"></div>
+      </div>
+
+      <!-- Tujuan Pembelajaran & Alur Inkuiri -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+          <i class="fa-solid fa-bullseye"></i>
+          <h3>Tujuan Pembelajaran</h3>
+        </div>
+        <ul class="text-xs text-slate-600 space-y-1.5 leading-relaxed list-disc pl-4">
+          <li>Mengidentifikasi gejala daya hantar listrik larutan berdasarkan nyala lampu dan gelembung gas pada elektroda.</li>
+          <li>Mengelompokkan larutan ke dalam elektrolit kuat, elektrolit lemah, dan non-elektrolit berdasarkan data percobaan.</li>
+          <li>Menjelaskan penyebab kemampuan larutan menghantarkan arus listrik menurut Teori Ion Svante Arrhenius.</li>
+          <li>Menganalisis hubungan jenis ikatan kimia (ionik dan kovalen polar) dengan daya hantar listriknya dalam wujud padatan, lelehan, dan larutan.</li>
+        </ul>
+      </div>
+
+      <!-- Form Identitas Peserta Didik -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-800">Identitas Peserta Didik</h3>
+            <p class="text-xs text-slate-500">Isi data diri dengan benar sebelum memulai pembelajaran</p>
+          </div>
+          <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <i class="fa-solid fa-id-card text-lg"></i>
+          </div>
+        </div>
+
+        <div class="space-y-3.5">
+          <div>
+            <label for="inputNama" class="block text-xs font-bold text-slate-700 mb-1">
+              Nama Lengkap Siswa <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input id="inputNama" type="text" placeholder="Contoh: Aulia Rahmawati"
+                class="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label for="inputKelas" class="block text-xs font-bold text-slate-700 mb-1">
+                Kelas <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <i class="fa-solid fa-school absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input id="inputKelas" type="text" list="daftarKelas" placeholder="Contoh: XI IPA 1"
+                  class="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" />
+                <datalist id="daftarKelas">
+                  <option value="X MIPA 1"></option>
+                  <option value="X MIPA 2"></option>
+                  <option value="XI IPA 1"></option>
+                  <option value="XI IPA 2"></option>
+                  <option value="XI IPA 3"></option>
+                </datalist>
+              </div>
+            </div>
+
+            <div>
+              <label for="inputAbsen" class="block text-xs font-bold text-slate-700 mb-1">
+                Nomor Absen <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <i class="fa-solid fa-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input id="inputAbsen" type="number" min="1" max="60" placeholder="Contoh: 07"
+                  class="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Peringatan Validasi Form -->
+          <div id="loginErrorBox" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+            <span id="loginErrorText">Mohon lengkapi Nama Lengkap, Kelas, dan Nomor Absen terlebih dahulu.</span>
+          </div>
+
+          <button type="button" onclick="startLearning()"
+            class="w-full py-3.5 px-5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 transition">
+            <span>Mulai Pembelajaran</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ringkasan 6 Sintaks Inkuiri Terbimbing -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Alur Sintaks Guided Inquiry Learning</h4>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">1</span>
+            <span class="font-semibold text-slate-700">Orientasi Fenomena</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">2</span>
+            <span class="font-semibold text-slate-700">Merumuskan Masalah</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">3</span>
+            <span class="font-semibold text-slate-700">Merumuskan Hipotesis</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">4</span>
+            <span class="font-semibold text-slate-700">Mengumpulkan Data</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">5</span>
+            <span class="font-semibold text-slate-700">Menguji Hipotesis (20 Soal)</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">6</span>
+            <span class="font-semibold text-slate-700">Merumuskan Kesimpulan</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SINTAKS 1: ORIENTASI (ORIENTATION)
+    ====================================================================== -->
+    <section id="step-1" class="step-section hidden space-y-4">
+      <div class="bg-indigo-600 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+          <!-- Lambang Sintaks 1: Orientasi Fenomena -->
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-[11px] uppercase tracking-wider font-bold text-indigo-200">Sintaks 1 • Guided Inquiry</span>
+          <h2 class="text-base sm:text-lg font-extrabold">Orientasi Peserta Didik pada Fenomena</h2>
+        </div>
+      </div>
+
+      <!-- Wacana Fenomena Kontekstual -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
+          <span>⚡</span>
+          <span>Fenomena Kontekstual</span>
+        </div>
+        <h3 class="text-sm sm:text-base font-bold text-slate-800">
+          Mengapa Tangan Basah Berisiko Tersengat Listrik, Sedangkan Air Suling Murni Tidak Menghantarkan Listrik?
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          Di rumah, kita sering diperingatkan agar <strong>tidak menyentuh sakelar atau peralatan listrik saat tangan basah</strong> karena berisiko tersengat arus listrik. Begitu pula penangkapan ikan menggunakan alat setrum di sungai sangat berbahaya karena air sungai dapat menghantarkan listrik.
+        </p>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          Namun, tahukah kamu bahwa ketika <strong>air suling murni (akuades / H₂O)</strong> diuji di laboratorium dengan rangkaian penguji elektroda, lampu bohlam ternyata <strong>padam</strong> dan tidak muncul gelembung gas? Sebaliknya, ketika ke dalam air suling ditambahkan satu sendok <strong>garam dapur (NaCl)</strong> atau <strong>asam cuka (CH₃COOH)</strong>, fenomena yang berbeda terjadi!
+        </p>
+      </div>
+
+      <!-- Ilustrasi & Animasi Interaktif 3 Gelas Kimia (Fenomena Awal) -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-start gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-600 flex items-center justify-center shrink-0 mt-0.5">
+              <!-- Lambang Simulasi Visual & Alat Uji -->
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-800">Simulasi Visual Fenomena Daya Hantar Listrik</h3>
+              <p class="text-xs text-slate-500">Sentuh salah satu sampel di bawah untuk mengamati nyala lampu &amp; gelembung gas</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200 shrink-0">Interaktif</span>
+        </div>
+
+        <!-- Tombol Pemilih Sampel Orientasi -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button type="button" onclick="setOrientationDemo('water')" id="orient-btn-water"
+            class="orient-sample-btn p-2.5 rounded-xl border text-left transition">
+            <div class="text-xs font-bold">1. Air Suling</div>
+            <div class="text-[11px] font-mono opacity-80">H₂O Murni</div>
+          </button>
+          <button type="button" onclick="setOrientationDemo('salt')" id="orient-btn-salt"
+            class="orient-sample-btn p-2.5 rounded-xl border text-left transition">
+            <div class="text-xs font-bold">2. Larutan Garam</div>
+            <div class="text-[11px] font-mono opacity-80">NaCl (aq)</div>
+          </button>
+          <button type="button" onclick="setOrientationDemo('vinegar')" id="orient-btn-vinegar"
+            class="orient-sample-btn p-2.5 rounded-xl border text-left transition">
+            <div class="text-xs font-bold">3. Larutan Cuka</div>
+            <div class="text-[11px] font-mono opacity-80">CH₃COOH (aq)</div>
+          </button>
+          <button type="button" onclick="setOrientationDemo('sugar')" id="orient-btn-sugar"
+            class="orient-sample-btn p-2.5 rounded-xl border text-left transition">
+            <div class="text-xs font-bold">4. Larutan Gula</div>
+            <div class="text-[11px] font-mono opacity-80">C₁₂H₂₂O₁₁ (aq)</div>
+          </button>
+        </div>
+
+        <!-- Canvas SVG Alat Uji Elektroda Orientasi -->
+        <div class="rounded-2xl bg-slate-900 p-4 text-white relative overflow-hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+            <!-- Visual Rangkaian Alat Uji -->
+            <div class="sm:col-span-7 flex justify-center">
+              <svg viewBox="0 0 280 230" class="w-full max-w-[270px] h-auto select-none">
+                <!-- Kabel Rangkaian -->
+                <path d="M 45 45 L 45 20 L 115 20" stroke="#94a3b8" stroke-width="3" fill="none" />
+                <path d="M 165 20 L 220 20 L 220 45" stroke="#94a3b8" stroke-width="3" fill="none" />
+                <path d="M 45 70 L 45 95 L 105 95 L 105 135" stroke="#ef4444" stroke-width="3" fill="none" />
+                <path d="M 220 70 L 220 95 L 175 95 L 175 135" stroke="#38bdf8" stroke-width="3" fill="none" />
+
+                <!-- Baterai DC -->
+                <rect x="25" y="45" width="40" height="26" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+                <text x="45" y="62" text-anchor="middle" fill="#f8fafc" font-size="9" font-weight="bold">DC 9V</text>
+
+                <!-- Bohlam Lampu -->
+                <g id="orientBulbGroup">
+                  <circle id="orientBulbHalo" cx="140" cy="22" r="22" fill="#facc15" opacity="0" />
+                  <circle id="orientBulbGlass" cx="140" cy="22" r="14" fill="#334155" stroke="#94a3b8" stroke-width="2" />
+                  <path d="M 134 26 L 137 17 L 143 17 L 146 26" stroke="#cbd5e1" stroke-width="1.5" fill="none" />
+                  <rect x="134" y="34" width="12" height="6" rx="2" fill="#64748b" />
+                </g>
+
+                <!-- Sakelar -->
+                <rect x="200" y="45" width="40" height="26" rx="4" fill="#0f766e" stroke="#14b8a6" stroke-width="2" />
+                <text x="220" y="61" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold">ON</text>
+
+                <!-- Gelas Kimia (Beaker Glass) -->
+                <path d="M 75 110 L 75 205 Q 75 215 85 215 L 195 215 Q 205 215 205 205 L 205 110" stroke="#cbd5e1" stroke-width="3" fill="rgba(255,255,255,0.05)" />
+                <!-- Cairan Larutan -->
+                <path id="orientLiquidPath" d="M 77 135 L 77 204 Q 77 213 86 213 L 194 213 Q 203 213 203 204 L 203 135 Z" fill="rgba(56, 189, 248, 0.28)" />
+
+                <!-- Batang Elektroda Karbon (Anoda & Katoda) -->
+                <rect x="100" y="115" width="10" height="82" rx="2" fill="#334155" stroke="#94a3b8" stroke-width="1" />
+                <rect x="170" y="115" width="10" height="82" rx="2" fill="#334155" stroke="#94a3b8" stroke-width="1" />
+                <text x="105" y="111" text-anchor="middle" fill="#fca5a5" font-size="8" font-weight="bold">(+)</text>
+                <text x="175" y="111" text-anchor="middle" fill="#7dd3fc" font-size="8" font-weight="bold">(-)</text>
+
+                <!-- Gelembung Gas Elektroda (Dinamis) -->
+                <g id="orientBubblesGroup"></g>
+
+                <!-- Partikel Mikroskopis Ion/Molekul (Dinamis) -->
+                <g id="orientParticlesGroup"></g>
+              </svg>
+            </div>
+
+            <!-- Keterangan Hasil Pengamatan Fenomena -->
+            <div class="sm:col-span-5 space-y-2.5 bg-slate-800/90 p-3.5 rounded-xl border border-slate-700">
+              <div class="text-xs font-bold text-cyan-300" id="orientTitleText">Sampel: Larutan Garam Dapur (NaCl)</div>
+              <div class="space-y-1.5 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-700">
+                  <span class="text-slate-400">Nyala Lampu:</span>
+                  <span id="orientLampBadge" class="font-bold text-amber-300">Menyala Terang</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-700">
+                  <span class="text-slate-400">Gelembung Gas:</span>
+                  <span id="orientBubbleBadge" class="font-bold text-emerald-300">Banyak Gelembung</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-700">
+                  <span class="text-slate-400">Partikel Terlarut:</span>
+                  <span id="orientParticleBadge" class="font-bold text-indigo-300">Ion Bebas (Na⁺ &amp; Cl⁻)</span>
+                </div>
+              </div>
+              <p id="orientDescText" class="text-[11px] text-slate-300 leading-relaxed pt-1">
+                Padatan NaCl terurai sempurna menjadi ion-ion yang bergerak bebas menghantarkan arus listrik.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pertanyaan Pemantik Orientasi -->
+        <div class="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100 space-y-2">
+          <label class="block text-xs font-bold text-indigo-950">
+            <i class="fa-solid fa-circle-question text-indigo-600 mr-1"></i>
+            Verifikasi Pengamatan Fenomena: Berdasarkan simulasi keempat sampel di atas, gejala fisik apakah yang menandakan suatu larutan dapat menghantarkan arus listrik?
+          </label>
+          <div class="space-y-1.5">
+            <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-indigo-400 transition text-xs">
+              <input type="radio" name="orientCheck" value="A" onchange="saveOrientCheck(this.value)" class="mt-0.5 accent-indigo-600" />
+              <span>Perubahan warna larutan menjadi keruh dan suhu gelas kimia menurun drastis</span>
+            </label>
+            <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-indigo-400 transition text-xs">
+              <input type="radio" name="orientCheck" value="B" onchange="saveOrientCheck(this.value)" class="mt-0.5 accent-indigo-600" />
+              <span>Menyalanya lampu bohlam (terang/redup) dan/atau terbentuknya gelembung gas pada batang elektroda</span>
+            </label>
+            <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-indigo-400 transition text-xs">
+              <input type="radio" name="orientCheck" value="C" onchange="saveOrientCheck(this.value)" class="mt-0.5 accent-indigo-600" />
+              <span>Mengendapnya seluruh zat terlarut di dasar gelas kimia saat sakelar dihubungkan</span>
+            </label>
+          </div>
+          <div id="orientFeedback" class="hidden text-xs font-medium p-2.5 rounded-lg"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SINTAKS 2: MERUMUSKAN MASALAH (PROBLEM FORMULATION)
+    ====================================================================== -->
+    <section id="step-2" class="step-section hidden space-y-4">
+      <div class="bg-indigo-600 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+          <!-- Lambang Sintaks 2: Merumuskan Masalah (Kaca Pembesar + Tanda Tanya) -->
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+            <path d="M9.09 9a2.5 2.5 0 0 1 4.83.83c0 1.67-2.5 2.5-2.5 2.5"/>
+            <line x1="11.5" y1="15" x2="11.51" y2="15"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-[11px] uppercase tracking-wider font-bold text-indigo-200">Sintaks 2 • Guided Inquiry</span>
+          <h2 class="text-base sm:text-lg font-extrabold">Merumuskan Masalah Penyelidikan</h2>
+        </div>
+      </div>
+
+      <!-- Panduan Identifikasi Masalah -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </span>
+          <span>Panduan Identifikasi Masalah</span>
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          Dari fenomena pada <strong>Sintaks 1</strong>, kamu melihat bahwa meskipun sama-sama berwujud cairan bening dan larut sempurna di dalam air, <strong>larutan garam (NaCl)</strong> menyalakan lampu dengan terang, <strong>larutan cuka (CH₃COOH)</strong> menyalakan lampu redup, sedangkan <strong>larutan gula (C₁₂H₂₂O₁₁)</strong> tidak menyalakan lampu sama sekali.
+        </p>
+        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed">
+          <strong>Tips Rumusan Masalah Ilmiah:</strong> Rumusan masalah yang baik berbentuk kalimat tanya yang jelas, dapat diuji melalui percobaan, dan menghubungkan <em>jenis partikel/ion dalam larutan</em> dengan <em>kemampuan menghantarkan arus listrik</em>.
+        </div>
+      </div>
+
+      <!-- Pilihan Rumusan Masalah Utama -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-sm font-extrabold text-slate-800">
+          1. Pilih Rumusan Masalah Utama yang Paling Tepat: <span class="text-rose-500">*</span>
+        </h3>
+        <p class="text-xs text-slate-500">Pilih satu pertanyaan masalah utama yang akan kita selidiki dalam E-LKPD ini:</p>
+
+        <div class="space-y-2.5" id="problemOptionsList">
+          <label class="problem-card block p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400 transition">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="problemChoice" value="1" onchange="selectProblem(1)" class="mt-1 accent-indigo-600" />
+              <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>A.</strong> Berapakah massa jenis dan titik didih larutan garam dapur dibandingkan larutan gula pasir pada suhu kamar?
+              </div>
+            </div>
+          </label>
+
+          <label class="problem-card block p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400 transition">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="problemChoice" value="2" onchange="selectProblem(2)" class="mt-1 accent-indigo-600" />
+              <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>B.</strong> Mengapa berbagai jenis larutan memiliki kemampuan daya hantar listrik yang berbeda (elektrolit kuat, elektrolit lemah, dan non-elektrolit) serta bagaimana pengaruh keberadaan ion bebas di dalamnya?
+              </div>
+            </div>
+          </label>
+
+          <label class="problem-card block p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400 transition">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="problemChoice" value="3" onchange="selectProblem(3)" class="mt-1 accent-indigo-600" />
+              <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>C.</strong> Bagaimana cara membuat rangkaian baterai sederhana menggunakan kabel tembaga dan bola lampu berdaya tinggi?
+              </div>
+            </div>
+          </label>
+
+          <label class="problem-card block p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400 transition">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="problemChoice" value="4" onchange="selectProblem(4)" class="mt-1 accent-indigo-600" />
+              <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>D.</strong> Mengapa semua zat padat yang berwarna putih dapat larut di dalam air suling apabila diaduk dengan cepat?
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div id="problemFeedbackBox" class="hidden p-3 rounded-xl text-xs font-medium leading-relaxed"></div>
+      </div>
+
+      <!-- Identifikasi Variabel Penyelidikan -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-sm font-extrabold text-slate-800">
+          2. Identifikasi Variabel Penyelidikan
+        </h3>
+        <p class="text-xs text-slate-500">Tentukan variabel dalam percobaan uji daya hantar listrik larutan:</p>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Variabel Bebas (yang sengaja diubah/divariasikan):</label>
+            <select id="varBebasSelect" onchange="checkVariables()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">-- Pilih Variabel Bebas --</option>
+              <option value="jenis_larutan">Jenis larutan yang diuji (HCl, NaOH, CH3COOH, NH4OH, C6H12O6, C2H5OH, NaCl)</option>
+              <option value="tegangan_baterai">Tegangan sumber arus baterai yang digunakan</option>
+              <option value="nyala_lampu">Terang redupnya nyala lampu dan jumlah gelembung gas</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="font-bold text-slate-700 block mb-1">Variabel Terikat (hasil yang diamati/diukur):</label>
+            <select id="varTerikatSelect" onchange="checkVariables()" class="w-full p-2.5 rounded-xl border border-slate-300 bg-slate-50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">-- Pilih Variabel Terikat --</option>
+              <option value="volume_gelas">Volume gelas kimia dan jarak antar elektroda</option>
+              <option value="gejala_hantaran">Daya hantar listrik larutan (nyala lampu & gelembung gas pada elektroda)</option>
+              <option value="jenis_larutan">Jenis larutan yang diuji</option>
+            </select>
+          </div>
+        </div>
+        <div id="variableFeedbackBox" class="hidden p-2.5 rounded-xl text-xs font-medium"></div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SINTAKS 3: MERUMUSKAN HIPOTESIS (HYPOTHESIS FORMULATION)
+    ====================================================================== -->
+    <section id="step-3" class="step-section hidden space-y-4">
+      <div class="bg-indigo-600 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+          <!-- Lambang Sintaks 3: Merumuskan Hipotesis (Lampu Ide) -->
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+            <path d="M9 18h6"/><path d="M10 22h4"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-[11px] uppercase tracking-wider font-bold text-indigo-200">Sintaks 3 • Guided Inquiry</span>
+          <h2 class="text-base sm:text-lg font-extrabold">Merumuskan Hipotesis</h2>
+        </div>
+      </div>
+
+      <!-- Landasan Teori Singkat (Scaffolding Inkuiri) -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-2.5">
+        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg">
+          <i class="fa-solid fa-book-open"></i>
+          <span>Informasi Pendukung (Teori Ion Svante Arrhenius)</span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+          Pada tahun 1887, ilmuwan Swedia <strong>Svante August Arrhenius</strong> mengemukakan bahwa zat elektrolit ketika dilarutkan dalam air akan terdisosiasi (terionisasi) menjadi partikel-partikel bermuatan listrik positif (<strong>kation</strong>) dan negatif (<strong>anion</strong>) yang bergerak bebas.
+        </p>
+        <div class="grid grid-cols-3 gap-2 pt-1 text-center text-[11px]">
+          <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+            <div class="font-extrabold">Ionisasi Sempurna</div>
+            <div class="font-mono text-xs mt-0.5">α = 1</div>
+            <div class="text-[10px] opacity-80 mt-0.5">Banyak ion bebas</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+            <div class="font-extrabold">Ionisasi Sebagian</div>
+            <div class="font-mono text-xs mt-0.5">0 &lt; α &lt; 1</div>
+            <div class="text-[10px] opacity-80 mt-0.5">Sedikit ion bebas</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700">
+            <div class="font-extrabold">Tidak Terionisasi</div>
+            <div class="font-mono text-xs mt-0.5">α = 0</div>
+            <div class="text-[10px] opacity-80 mt-0.5">Molekul netral</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pilihan Hipotesis Penyelidikan -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-sm font-extrabold text-slate-800">
+          Pilih Rumusan Hipotesis (Dugaan Sementara) Anda: <span class="text-rose-500">*</span>
+        </h3>
+        <p class="text-xs text-slate-500">
+          Berdasarkan rumusan masalah pada Sintaks 2, pilihlah hipotesis yang paling tepat mengenai hubungan keberadaan ion bebas dengan daya hantar listrik larutan:
+        </p>
+
+        <div class="space-y-2.5">
+          <label class="hypothesis-card block p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400 transition">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="hypothesisChoice" value="1" onchange="selectHypothesis(1)" class="mt-1 accent-indigo-600" />
+              <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>Hipotesis A:</strong> Semua zat cair yang bening dan dapat melarutkan zat padat pasti menghantarkan arus listrik dengan nyala lampu terang karena molekul air sendiri merupakan penghantar listrik kuat.
+              </div>
+            </div>
+          </label>
+
+          <label class="hypothesis-card block p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400 transition">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="hypothesisChoice" value="2" onchange="selectHypothesis(2)" class="mt-1 accent-indigo-600" />
+              <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>Hipotesis B:</strong> Jika zat terlarut mengalami ionisasi sempurna menghasilkan banyak ion bebas maka larutan bersifat <em>elektrolit kuat</em> (lampu terang & gelembung banyak); jika terionisasi sebagian menghasilkan sedikit ion bebas maka bersifat <em>elektrolit lemah</em> (lampu redup/padam & gelembung sedikit); dan jika tidak terionisasi (tetap sebagai molekul netral) maka bersifat <em>non-elektrolit</em> (lampu padam & tidak ada gelembung).
+              </div>
+            </div>
+          </label>
+
+          <label class="hypothesis-card block p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-400 transition">
+            <div class="flex items-start gap-3">
+              <input type="radio" name="hypothesisChoice" value="3" onchange="selectHypothesis(3)" class="mt-1 accent-indigo-600" />
+              <div class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <strong>Hipotesis C:</strong> Semakin besar rumus molekul suatu senyawa organik seperti glukosa (C₆H₁₂O₆), maka semakin banyak ion bebas yang dihasilkan sehingga nyala lampu semakin terang.
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div id="hypothesisFeedbackBox" class="hidden p-3 rounded-xl text-xs font-medium leading-relaxed"></div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SINTAKS 4: MENGUMPULKAN DATA (DATA COLLECTION & VIRTUAL LAB)
+    ====================================================================== -->
+    <section id="step-4" class="step-section hidden space-y-4">
+      <div class="bg-indigo-600 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+          <!-- Lambang Sintaks 4: Mengumpulkan Data Lab -->
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-[11px] uppercase tracking-wider font-bold text-indigo-200">Sintaks 4 • Guided Inquiry</span>
+          <h2 class="text-base sm:text-lg font-extrabold">Mengumpulkan Data (Simulasi &amp; Tabel Pengamatan)</h2>
+        </div>
+      </div>
+
+      <!-- SIMULASI LABORATORIUM VIRTUAL INTERAKTIF 7 LARUTAN -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700">Virtual Lab Kimia</span>
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-800 mt-1">Alat Uji Daya Hantar Listrik 7 Larutan</h3>
+          </div>
+          <div class="text-right">
+            <span id="labTestedCountBadge" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+              0/7 Diuji
+            </span>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed">
+          <strong>Petunjuk Praktikum Virtual:</strong> Pilih salah satu dari 7 larutan uji di bawah ini, lalu tekan tombol <strong>"Hubungkan Sakelar (Uji Larutan)"</strong>. Amati nyala lampu, gelembung gas pada elektroda, serta reaksi di tingkat mikroskopis, kemudian catat hasilnya pada <strong>Tabel Pengamatan Interaktif</strong> di bawah!
+        </p>
+
+        <!-- Pilihan 7 Larutan Uji -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="labSolutionButtons">
+          <!-- Diisi via JavaScript -->
+        </div>
+
+        <!-- Layar Simulator Alat Uji -->
+        <div class="rounded-2xl bg-slate-900 text-white p-4 border border-slate-800 shadow-inner space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+            <div>
+              <div class="text-[11px] text-slate-400">Larutan pada Gelas Kimia:</div>
+              <div id="labCurrentSolutionTitle" class="text-sm font-extrabold text-cyan-300">1. Asam Klorida (HCl 0,1 M)</div>
+            </div>
+            <button type="button" id="labSwitchBtn" onclick="toggleLabPower()"
+              class="px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition shadow-md bg-rose-600 hover:bg-rose-500 text-white">
+              <i id="labSwitchIcon" class="fa-solid fa-power-off"></i>
+              <span id="labSwitchLabel">Sakelar: OFF (Sentuh untuk Uji)</span>
+            </button>
+          </div>
+
+          <!-- Visual Alat Uji + Mikroskopis -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+            <div class="sm:col-span-6 flex justify-center">
+              <svg viewBox="0 0 280 230" class="w-full max-w-[260px] h-auto select-none">
+                <!-- Kabel Rangkaian -->
+                <path d="M 45 45 L 45 20 L 115 20" stroke="#94a3b8" stroke-width="3" fill="none" />
+                <path d="M 165 20 L 220 20 L 220 45" stroke="#94a3b8" stroke-width="3" fill="none" />
+                <path d="M 45 70 L 45 95 L 105 95 L 105 135" stroke="#ef4444" stroke-width="3" fill="none" />
+                <path d="M 220 70 L 220 95 L 175 95 L 175 135" stroke="#38bdf8" stroke-width="3" fill="none" />
+
+                <!-- Sumber Arus DC -->
+                <rect x="22" y="45" width="46" height="26" rx="4" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+                <text x="45" y="61" text-anchor="middle" fill="#f8fafc" font-size="9" font-weight="bold">BATERAI</text>
+
+                <!-- Bohlam Lampu Uji -->
+                <g id="labBulbGroup">
+                  <circle id="labBulbHalo" cx="140" cy="22" r="24" fill="#facc15" opacity="0" />
+                  <circle id="labBulbGlass" cx="140" cy="22" r="14" fill="#334155" stroke="#94a3b8" stroke-width="2" />
+                  <path d="M 134 26 L 137 17 L 143 17 L 146 26" stroke="#cbd5e1" stroke-width="1.5" fill="none" />
+                  <rect x="134" y="34" width="12" height="6" rx="2" fill="#64748b" />
+                </g>
+
+                <!-- Indikator Sakelar -->
+                <rect id="labSvgSwitchBox" x="197" y="45" width="46" height="26" rx="4" fill="#dc2626" stroke="#f87171" stroke-width="2" />
+                <text id="labSvgSwitchText" x="220" y="61" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold">OFF</text>
+
+                <!-- Gelas Kimia -->
+                <path d="M 75 110 L 75 205 Q 75 215 85 215 L 195 215 Q 205 215 205 205 L 205 110" stroke="#cbd5e1" stroke-width="3" fill="rgba(255,255,255,0.04)" />
+                <path id="labLiquidPath" d="M 77 135 L 77 204 Q 77 213 86 213 L 194 213 Q 203 213 203 204 L 203 135 Z" fill="rgba(56, 189, 248, 0.25)" />
+
+                <!-- Elektroda Karbon -->
+                <rect x="100" y="115" width="10" height="82" rx="2" fill="#334155" stroke="#94a3b8" stroke-width="1" />
+                <rect x="170" y="115" width="10" height="82" rx="2" fill="#334155" stroke="#94a3b8" stroke-width="1" />
+                <text x="105" y="110" text-anchor="middle" fill="#fca5a5" font-size="8" font-weight="bold">Anoda (+)</text>
+                <text x="175" y="110" text-anchor="middle" fill="#7dd3fc" font-size="8" font-weight="bold">Katoda (-)</text>
+
+                <!-- Gelembung & Partikel Lab -->
+                <g id="labBubblesGroup"></g>
+                <g id="labParticlesGroup"></g>
+              </svg>
+            </div>
+
+            <!-- Panel Pembacaan Alat Uji -->
+            <div class="sm:col-span-6 space-y-2.5 bg-slate-800/90 p-3.5 rounded-xl border border-slate-700">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Status Pengamatan</span>
+                <span id="labPowerStatusPill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">Arus Terputus</span>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+                <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700">
+                  <div class="text-[10px] text-slate-400">Kondisi Lampu</div>
+                  <div id="labReadoutLamp" class="font-bold text-slate-200 mt-0.5">- (Sakelar OFF)</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700">
+                  <div class="text-[10px] text-slate-400">Gelembung Elektroda</div>
+                  <div id="labReadoutBubbles" class="font-bold text-slate-200 mt-0.5">- (Sakelar OFF)</div>
+                </div>
+              </div>
+
+              <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 space-y-1">
+                <div class="text-[10px] text-slate-400">Reaksi dalam Air & Spesies Partikel:</div>
+                <div id="labReadoutEquation" class="font-mono text-xs text-cyan-300 font-semibold">Pilih & nyalakan sakelar untuk mengamati</div>
+                <div id="labReadoutMicro" class="text-[11px] text-slate-300 leading-snug"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABEL PENGAMATAN INTERAKTIF (TOMBOL TOGGLE / RADIO PILLS) -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-800">
+              Tabel Pengamatan Hasil Percobaan
+            </h3>
+            <p class="text-xs text-slate-500">
+              Klik tombol pilihan pada setiap larutan sesuai hasil pengamatan pada Virtual Lab di atas!
+            </p>
+          </div>
+          <span id="obsProgressBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+            0/7 Lengkap
+          </span>
+        </div>
+
+        <!-- Daftar Kartu Tabel Pengamatan Mobile-Friendly (7 Larutan) -->
+        <div id="observationCardsContainer" class="space-y-3.5">
+          <!-- Di-render secara dinamis oleh JavaScript -->
+        </div>
+
+        <!-- Tombol Verifikasi Tabel Pengamatan -->
+        <div class="pt-2 flex flex-col sm:flex-row gap-2.5 items-center justify-between">
+          <button type="button" onclick="verifyObservationTable()"
+            class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition">
+            <i class="fa-solid fa-check-double"></i>
+            <span>Periksa Ketepatan Tabel Pengamatan</span>
+          </button>
+          <span id="obsCheckSummaryText" class="text-xs font-semibold text-slate-600"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SINTAKS 5: MENGUJI HIPOTESIS & EVALUASI HASIL BELAJAR (20 SOAL PG)
+    ====================================================================== -->
+    <section id="step-5" class="step-section hidden space-y-4">
+      <div class="bg-indigo-600 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+          <!-- Lambang Sintaks 5: Menguji Hipotesis & Evaluasi -->
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/>
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+            <path d="m9 14 2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-[11px] uppercase tracking-wider font-bold text-indigo-200">Sintaks 5 • Guided Inquiry</span>
+          <h2 class="text-base sm:text-lg font-extrabold">Menguji Hipotesis &amp; Evaluasi (20 Soal)</h2>
+        </div>
+      </div>
+
+      <!-- Informasi Evaluasi Pilihan Ganda -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-800">Kuis Evaluasi Pemahaman Konsep (Pilihan Ganda A–E)</h3>
+            <p class="text-xs text-slate-500">Jawablah seluruh 20 butir soal pilihan ganda berikut untuk menguji hipotesis dan pemahamanmu.</p>
+          </div>
+          <div class="px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-extrabold" id="quizAnsweredCounter">
+            Terjawab: 0 / 20
+          </div>
+        </div>
+
+        <!-- Navigator Nomor Soal (1 - 20) -->
+        <div>
+          <div class="text-[11px] font-semibold text-slate-400 mb-1.5">Navigasi Cepat Nomor Soal:</div>
+          <div id="quizNumberGrid" class="grid grid-cols-10 gap-1.5">
+            <!-- Di-render oleh JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Daftar 20 Soal Pilihan Ganda (A, B, C, D, E) -->
+      <div id="quizQuestionsContainer" class="space-y-4">
+        <!-- Di-render oleh JS dari struktur JSON 20 soal -->
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SINTAKS 6: MERUMUSKAN KESIMPULAN (CONCLUSION FORMULATION)
+    ====================================================================== -->
+    <section id="step-6" class="step-section hidden space-y-4">
+      <div class="bg-indigo-600 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+          <!-- Lambang Sintaks 6: Merumuskan Kesimpulan -->
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+            <line x1="4" x2="4" y1="22" y2="15"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-[11px] uppercase tracking-wider font-bold text-indigo-200">Sintaks 6 • Guided Inquiry</span>
+          <h2 class="text-base sm:text-lg font-extrabold">Merumuskan Kesimpulan Terbimbing</h2>
+        </div>
+      </div>
+
+      <!-- Konfirmasi Hipotesis Awal -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-scale-balanced text-indigo-600"></i>
+          <span>1. Konfirmasi Kebenaran Hipotesis</span>
+        </h3>
+        <p class="text-xs text-slate-600 leading-relaxed">
+          Berdasarkan data pengamatan 7 larutan pada Sintaks 4 dan pengujian konsep pada Sintaks 5, apakah hipotesis yang menghubungkan <strong>keberadaan ion-ion bebas hasil ionisasi</strong> dengan <strong>kemampuan larutan menghantarkan arus listrik</strong> terbukti benar?
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <label class="p-3 rounded-xl border border-slate-200 flex items-start gap-2.5 cursor-pointer hover:border-indigo-400 transition">
+            <input type="radio" name="conclusionHypoConfirm" value="accepted" onchange="updateConclusionState()" class="mt-0.5 accent-indigo-600" />
+            <div>
+              <div class="font-bold text-slate-800">Ya, Hipotesis Diterima</div>
+              <div class="text-slate-500 mt-0.5">Daya hantar listrik larutan ditentukan oleh banyaknya ion-ion yang bergerak bebas di dalam larutan.</div>
+            </div>
+          </label>
+          <label class="p-3 rounded-xl border border-slate-200 flex items-start gap-2.5 cursor-pointer hover:border-indigo-400 transition">
+            <input type="radio" name="conclusionHypoConfirm" value="rejected" onchange="updateConclusionState()" class="mt-0.5 accent-indigo-600" />
+            <div>
+              <div class="font-bold text-slate-800">Tidak, Hipotesis Ditolak</div>
+              <div class="text-slate-500 mt-0.5">Daya hantar listrik larutan sama sekali tidak dipengaruhi oleh keberadaan ion bebas.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Penyusunan Kesimpulan Terbimbing (Fill-in Cloze / Guided Synthesis) -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-4">
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-800">2. Rangkuman Kesimpulan Konsep</h3>
+          <p class="text-xs text-slate-500">Lengkapi pernyataan kesimpulan ilmiah berikut dengan memilih konsep yang tepat:</p>
+        </div>
+
+        <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <p>
+            <strong>A.</strong> Larutan <strong>elektrolit kuat</strong> (seperti HCl, NaOH, NaCl) mengalami ionisasi
+            <select id="concSelect1" onchange="updateConclusionState()" class="inline-block mx-1 px-2.5 py-1 rounded-lg border border-indigo-300 bg-white font-bold text-indigo-700 text-xs">
+              <option value="">-- pilih --</option>
+              <option value="sempurna">sempurna (α = 1)</option>
+              <option value="sebagian">sebagian (0 &lt; α &lt; 1)</option>
+              <option value="tidak">tidak terionisasi (α = 0)</option>
+            </select>
+            sehingga menghasilkan banyak ion bebas, ditandai dengan lampu menyala <strong>terang</strong> dan gelembung gas <strong>banyak</strong>.
+          </p>
+
+          <p>
+            <strong>B.</strong> Larutan <strong>elektrolit lemah</strong> (seperti CH₃COOH dan NH₄OH) mengalami ionisasi
+            <select id="concSelect2" onchange="updateConclusionState()" class="inline-block mx-1 px-2.5 py-1 rounded-lg border border-indigo-300 bg-white font-bold text-indigo-700 text-xs">
+              <option value="">-- pilih --</option>
+              <option value="sempurna">sempurna (α = 1)</option>
+              <option value="sebagian">sebagian (0 &lt; α &lt; 1)</option>
+              <option value="tidak">tidak terionisasi (α = 0)</option>
+            </select>
+            sehingga menghasilkan sedikit ion bebas, ditandai dengan lampu <strong>redup/padam</strong> tetapi masih terdapat <strong>sedikit gelembung gas</strong>.
+          </p>
+
+          <p>
+            <strong>C.</strong> Ditinjau dari jenis ikatan kimianya, senyawa <strong>ionik</strong> (seperti NaCl) dapat menghantarkan listrik dalam wujud
+            <select id="concSelect3" onchange="updateConclusionState()" class="inline-block mx-1 px-2.5 py-1 rounded-lg border border-indigo-300 bg-white font-bold text-indigo-700 text-xs">
+              <option value="">-- pilih --</option>
+              <option value="padatan_saja">padatan (kristal) saja</option>
+              <option value="lelehan_dan_larutan">lelehan (cairan) dan larutan (aq)</option>
+              <option value="larutan_saja">larutan (aq) saja, sedangkan lelehannya tidak</option>
+            </select>
+            sedangkan senyawa <strong>kovalen polar</strong> (seperti HCl) hanya dapat menghantarkan listrik dalam wujud
+            <select id="concSelect4" onchange="updateConclusionState()" class="inline-block mx-1 px-2.5 py-1 rounded-lg border border-indigo-300 bg-white font-bold text-indigo-700 text-xs">
+              <option value="">-- pilih --</option>
+              <option value="padatan">padatan murni</option>
+              <option value="lelehan_murni">lelehan murni tanpa air</option>
+              <option value="larutan_air">larutan di dalam air (aq)</option>
+            </select>.
+          </p>
+        </div>
+
+        <!-- Ringkasan Kelengkapan Sebelum Kirim -->
+        <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 space-y-2">
+          <div class="text-xs font-extrabold text-indigo-950 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info text-indigo-600"></i>
+            <span>Status Kelengkapan E-LKPD Anda Sebelum Dikirim:</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-white p-2.5 rounded-xl border border-indigo-100 flex justify-between">
+              <span class="text-slate-500">Tabel Pengamatan:</span>
+              <span id="preSubmitObsStatus" class="font-bold text-slate-800">0/7</span>
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-indigo-100 flex justify-between">
+              <span class="text-slate-500">Soal Evaluasi PG:</span>
+              <span id="preSubmitQuizStatus" class="font-bold text-slate-800">0/20</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tombol Utama Kirim & Lihat Hasil -->
+        <button type="button" id="btnOpenSubmitModal" onclick="openConfirmSubmitModal()"
+          class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.99] text-white font-extrabold text-sm sm:text-base shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2.5 transition">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>Kirim &amp; Lihat Hasil Akhir</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         TAHAP 7: HALAMAN HASIL AKHIR & INTEGRASI GOOGLE SHEETS
+    ====================================================================== -->
+    <section id="step-7" class="step-section hidden space-y-4">
+      <!-- Kartu Skor Utama -->
+      <div class="rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white p-6 shadow-xl relative overflow-hidden">
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <span class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-lock"></i>
+            <span>Jawaban Terkunci &amp; Selesai</span>
+          </span>
+          <span id="resultTimestamp" class="text-[11px] text-indigo-200 font-mono">-</span>
+        </div>
+
+        <div class="text-center space-y-1 py-2">
+          <div class="text-xs uppercase tracking-widest text-indigo-200 font-bold">Nilai Akhir Evaluasi E-LKPD</div>
+          <div id="finalScoreNumber" class="text-6xl font-extrabold tracking-tight text-amber-300">0</div>
+          <div id="finalPredicateBadge" class="inline-block px-3 py-1 rounded-full bg-white/10 text-xs font-bold text-white mt-2">
+            Predikat: -
+          </div>
+        </div>
+
+        <!-- Detail Identitas & Statistik Jawaban -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5 pt-4 border-t border-white/15 text-xs">
+          <div class="bg-white/10 rounded-xl p-2.5">
+            <div class="text-[10px] text-indigo-200">Nama Siswa</div>
+            <div id="resStudentName" class="font-bold truncate mt-0.5">-</div>
+          </div>
+          <div class="bg-white/10 rounded-xl p-2.5">
+            <div class="text-[10px] text-indigo-200">Kelas / Absen</div>
+            <div id="resStudentClass" class="font-bold truncate mt-0.5">-</div>
+          </div>
+          <div class="bg-emerald-500/20 border border-emerald-400/30 rounded-xl p-2.5">
+            <div class="text-[10px] text-emerald-200">Jumlah Benar</div>
+            <div id="resCorrectCount" class="font-extrabold text-base text-emerald-300 mt-0.5">0 Soal</div>
+          </div>
+          <div class="bg-rose-500/20 border border-rose-400/30 rounded-xl p-2.5">
+            <div class="text-[10px] text-rose-200">Jumlah Salah</div>
+            <div id="resWrongCount" class="font-extrabold text-base text-rose-300 mt-0.5">0 Soal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Sinkronisasi Database Google Sheets -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <div id="syncIconContainer" class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <i id="syncStatusIcon" class="fa-solid fa-cloud-arrow-up text-lg"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-800">Status Pengiriman Nilai</h3>
+              <p id="syncStatusSubtitle" class="text-xs text-slate-500">Mengirim data hasil belajar secara otomatis ke database peneliti...</p>
+            </div>
+          </div>
+          <button type="button" onclick="retrySendToGoogleSheets()" id="btnRetryWebhook"
+            class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition shrink-0">
+            <i class="fa-solid fa-rotate mr-1"></i>Kirim Ulang
+          </button>
+        </div>
+
+        <!-- Payload JSON Preview disembunyikan dari siswa, hanya tampil di Panel Peneliti -->
+        <pre id="webhookPayloadPreview" class="hidden"></pre>
+      </div>
+
+      <!-- Rekapitulasi Performa Sintaks Inkuiri -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-sm font-extrabold text-slate-800">Rekapitulasi Aktivitas Inkuiri Terbimbing</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-slate-500">Rumusan Masalah &amp; Hipotesis</div>
+            <div id="resInquiryScore" class="text-sm font-extrabold text-indigo-700 mt-1">-</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-slate-500">Ketepatan Tabel Pengamatan</div>
+            <div id="resObsAccuracy" class="text-sm font-extrabold text-emerald-700 mt-1">-</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-slate-500">Rumusan Kesimpulan</div>
+            <div id="resConclusionAccuracy" class="text-sm font-extrabold text-cyan-700 mt-1">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pembahasan Lengkap 20 Soal Evaluasi Pilihan Ganda -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-slate-800">Review &amp; Pembahasan 20 Soal Evaluasi</h3>
+          <span class="text-xs font-semibold text-slate-500">Skor per soal: 5 Poin</span>
+        </div>
+        <div id="quizReviewContainer" class="space-y-3">
+          <!-- Di-render otomatis setelah submit -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= BOTTOM NAVIGATION BAR (TOUCH-FRIENDLY) ================= -->
+  <nav id="bottomNavBar" class="hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg">
+    <div class="max-w-xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <button type="button" id="btnPrevStep" onclick="prevStep()"
+        class="px-4 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 font-bold text-xs sm:text-sm flex items-center gap-2 transition">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        <span>Sebelumnya</span>
+      </button>
+
+      <div class="text-center">
+        <div id="bottomStepTitle" class="text-xs font-extrabold text-slate-800">Sintaks 1</div>
+        <div id="bottomStepSubtitle" class="text-[10px] text-slate-500">Orientasi Fenomena</div>
+      </div>
+
+      <button type="button" id="btnNextStep" onclick="nextStep()"
+        class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-indigo-500/20 transition">
+        <span id="btnNextStepLabel">Selanjutnya</span>
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================= MODAL KONFIRMASI KIRIM & KUNCI JAWABAN ================= -->
+  <div id="confirmSubmitModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto">
+        <i class="fa-solid fa-paper-plane"></i>
+      </div>
+      <div class="text-center space-y-1.5">
+        <h3 class="text-lg font-extrabold text-slate-800">Kirim &amp; Kunci Jawaban E-LKPD?</h3>
+        <p id="confirmModalWarningText" class="text-xs text-slate-600 leading-relaxed">
+          Setelah Anda menekan tombol <strong>"Ya, Kirim Sekarang"</strong>, nilai akhir akan langsung dihitung, dikirim ke database Google Sheets, dan seluruh jawaban akan dikunci.
+        </p>
+      </div>
+
+      <div id="unansweredWarningBox" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium"></div>
+
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button type="button" onclick="closeConfirmSubmitModal()"
+          class="py-3 px-4 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition">
+          Periksa Kembali
+        </button>
+        <button type="button" onclick="finalizeAndSubmitLKPD()"
+          class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition">
+          Ya, Kirim Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL PENELITI: KODE GOOGLE APPS SCRIPT (.GS) & JSON SOAL ================= -->
+  <div id="researcherModal" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+      <!-- Header Modal -->
+      <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-database text-cyan-400 text-lg"></i>
+          <div>
+            <h3 class="text-sm font-extrabold">Panel Peneliti: Integrasi Google Sheets &amp; Kode `google_apps_script.gs`</h3>
+            <p class="text-[11px] text-slate-400">Zero-Backend Database untuk Instrumen Penelitian Skripsi</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeResearcherModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Body Modal Scrollable -->
+      <div class="p-5 overflow-y-auto space-y-5 text-xs text-slate-700">
+        <!-- Input URL Webhook Google Apps Script -->
+        <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 space-y-2.5">
+          <label for="customWebhookUrlInput" class="block font-extrabold text-indigo-950">
+            <i class="fa-solid fa-link mr-1 text-indigo-600"></i>
+            URL Web App Google Apps Script (`exec`):
+          </label>
+          <p class="text-[11px] text-indigo-900 leading-relaxed">
+            Tempelkan URL hasil <strong>Deploy &rarr; New Deployment &rarr; Web App</strong> dari Google Sheets Anda di bawah ini (atau ubah langsung konstanta <code>DEFAULT_GOOGLE_SCRIPT_URL</code> di dalam kode sumber):
+          </p>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="customWebhookUrlInput" type="url" placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+              class="flex-1 px-3.5 py-2.5 rounded-xl border border-indigo-300 bg-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <button type="button" onclick="saveCustomWebhookUrl()"
+              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shrink-0 transition">
+              Terapkan URL
+            </button>
+          </div>
+          <div id="webhookSaveFeedback" class="hidden text-[11px] font-bold text-emerald-700"></div>
+        </div>
+
+        <!-- Langkah Pemasangan Google Sheets -->
+        <div class="space-y-2">
+          <h4 class="font-extrabold text-slate-900 text-sm">Panduan Cepat Pemasangan di Google Sheets (2 Menit):</h4>
+          <ol class="list-decimal pl-4 space-y-1 text-slate-600 leading-relaxed">
+            <li>Buat file baru di <strong>Google Sheets</strong>, lalu klik menu <strong>Extensions (Ekstensi) &rarr; Apps Script</strong>.</li>
+            <li>Hapus seluruh isi kode di editor, lalu salin dan tempelkan kode <code>google_apps_script.gs</code> di bawah ini.</li>
+            <li>Klik ikon <strong>Save (Simpan)</strong>, lalu jalankan fungsi <code>setupSheet()</code> sekali untuk membuat header kolom otomatis, atau langsung klik <strong>Deploy &rarr; New deployment</strong>.</li>
+            <li>Pilih jenis <strong>Web app</strong>, atur <em>Execute as:</em> <strong>Me</strong>, dan <em>Who has access:</em> <strong>Anyone (Siapa saja)</strong>.</li>
+            <li>Salin <strong>Web App URL</strong> yang berakhiran <code>/exec</code> lalu tempelkan pada kolom di atas.</li>
+          </ol>
+        </div>
+
+        <!-- Blok Kode google_apps_script.gs -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-bold text-slate-800 bg-slate-200 px-2.5 py-1 rounded-lg">2. File: google_apps_script.gs</span>
+            <button type="button" onclick="copyAppsScriptCode()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center gap-1.5">
+              <i class="fa-regular fa-copy"></i>
+              <span id="copyGsBtnText">Salin Kode .gs</span>
+            </button>
+          </div>
+          <pre id="gsCodeBlock" class="p-3.5 rounded-2xl bg-slate-900 text-cyan-300 font-mono text-[11px] overflow-x-auto leading-relaxed select-all">/**
+ * FILE: google_apps_script.gs
+ * Database Google Sheets untuk Penelitian Skripsi E-LKPD Guided Inquiry
+ * Materi: Larutan Elektrolit dan Non-Elektrolit
+ */
+
+const SHEET_NAME = 'Data_Nilai_ELKPD';
+
+function setupSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+  }
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      'Timestamp Server',
+      'Waktu Selesai Siswa',
+      'Nama Lengkap',
+      'Kelas',
+      'Nomor Absen',
+      'Nilai Akhir (0-100)',
+      'Jumlah Benar (dari 20)',
+      'Jumlah Salah',
+      'Ketepatan Tabel Pengamatan (%)',
+      'Status Rumusan Masalah & Hipotesis',
+      'Detail Jawaban 20 Soal PG (JSON)'
+    ]);
+    sheet.getRange(1, 1, 1, 11).setFontWeight('bold').setBackground('#e0e7ff');
+  }
+}
+
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      setupSheet();
+      sheet = ss.getSheetByName(SHEET_NAME);
+    }
+
+    const rawBody = e.postData ? e.postData.contents : '{}';
+    const data = JSON.parse(rawBody);
+
+    sheet.appendRow([
+      new Date(),
+      data.waktuSelesai || '',
+      data.namaLengkap || '',
+      data.kelas || '',
+      data.nomorAbsen || '',
+      Number(data.nilaiAkhir) || 0,
+      Number(data.jumlahBenar) || 0,
+      Number(data.jumlahSalah) || 0,
+      data.skorObservasiPersen || '0%',
+      data.statusInkuiri || '',
+      JSON.stringify(data.jawabanPG || {})
+    ]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'success', message: 'Data E-LKPD berhasil disimpan' }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
+}</pre>
+        </div>
+      </div>
+
+      <!-- Footer Modal -->
+      <div class="px-5 py-3 bg-slate-100 border-t border-slate-200 flex justify-end">
+        <button type="button" onclick="closeResearcherModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold">
+          Tutup Panel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT UTAMA E-LKPD INTERAKTIF ================= -->
+  <script>
+    /***************************************************************************
+     * 1. KONFIGURASI WEBHOOK GOOGLE APPS SCRIPT (TERTANAM OTOMATIS)
+     * Seluruh data siswa otomatis dikirim ke URL Google Sheets Peneliti berikut:
+     ***************************************************************************/
+    const DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3y6vPPCeGUXYmIanbPY5Lm5XgNhoyKgPc5fiy7NxEWAFtrkQgbhVaPBaHz1Gu51qUnQ/exec";
+    let GOOGLE_SCRIPT_WEB_APP_URL = DEFAULT_GOOGLE_SCRIPT_URL;
+
+    // Bersihkan sisa penyimpanan lokal lama (jika pernah berisi URL placeholder)
+    try {
+      const savedUrl = localStorage.getItem("ELKPD_WEBHOOK_URL");
+      if (savedUrl && savedUrl.includes("GANTI_DENGAN_ID_DEPLOYMENT_ANDA")) {
+        localStorage.removeItem("ELKPD_WEBHOOK_URL");
+      }
+    } catch (e) {}
+
+    // Trigger Rahasia Peneliti: Ketuk 5 kali dengan cepat pada ikon lab di kiri atas header
+    let secretTapCount = 0;
+    let secretTapTimer = null;
+    function handleSecretResearcherTrigger() {
+      secretTapCount++;
+      if (secretTapTimer) clearTimeout(secretTapTimer);
+      if (secretTapCount >= 5) {
+        secretTapCount = 0;
+        openResearcherModal();
+      } else {
+        secretTapTimer = setTimeout(() => {
+          secretTapCount = 0;
+        }, 1200);
+      }
+    }
+
+    /***************************************************************************
+     * 2. DATA LABORATORIUM VIRTUAL & TABEL PENGAMATAN (7 LARUTAN UJI)
+     ***************************************************************************/
+    const LAB_SOLUTIONS = [
+      {
+        id: "HCl",
+        name: "Asam Klorida",
+        formula: "HCl",
+        molarity: "0,1 M",
+        lamp: "Terang",
+        bubbles: "Banyak",
+        type: "Elektrolit Kuat",
+        alpha: "α = 1 (Ionisasi Sempurna)",
+        equation: "HCl(aq) → H⁺(aq) + Cl⁻(aq)",
+        microDesc: "Senyawa kovalen polar kuat yang terionisasi sempurna di dalam air menjadi ion H⁺ dan Cl⁻ yang bergerak bebas.",
+        particleType: "strong_ions",
+        ionLabels: ["H⁺", "Cl⁻"]
+      },
+      {
+        id: "NaOH",
+        name: "Natrium Hidroksida",
+        formula: "NaOH",
+        molarity: "0,1 M",
+        lamp: "Terang",
+        bubbles: "Banyak",
+        type: "Elektrolit Kuat",
+        alpha: "α = 1 (Disosiasi Sempurna)",
+        equation: "NaOH(aq) → Na⁺(aq) + OH⁻(aq)",
+        microDesc: "Basa kuat senyawa ionik yang terurai sempurna menghasilkan banyak ion Na⁺ dan OH⁻ bebas.",
+        particleType: "strong_ions",
+        ionLabels: ["Na⁺", "OH⁻"]
+      },
+      {
+        id: "CH3COOH",
+        name: "Asam Asetat (Cuka)",
+        formula: "CH₃COOH",
+        molarity: "0,1 M",
+        lamp: "Redup",
+        bubbles: "Sedikit",
+        type: "Elektrolit Lemah",
+        alpha: "0 < α < 1 (Ionisasi Sebagian)",
+        equation: "CH₃COOH(aq) ⇌ H⁺(aq) + CH₃COO⁻(aq)",
+        microDesc: "Asam lemah yang hanya terionisasi sebagian kecil. Sebagian besar tetap berupa molekul CH₃COOH netral.",
+        particleType: "weak_ions",
+        ionLabels: ["H⁺", "Ac⁻", "CH₃COOH"]
+      },
+      {
+        id: "NH4OH",
+        name: "Amonium Hidroksida",
+        formula: "NH₄OH",
+        molarity: "0,1 M",
+        lamp: "Redup",
+        bubbles: "Sedikit",
+        type: "Elektrolit Lemah",
+        alpha: "0 < α < 1 (Ionisasi Sebagian)",
+        equation: "NH₄OH(aq) ⇌ NH₄⁺(aq) + OH⁻(aq)",
+        microDesc: "Basa lemah yang terionisasi sebagian menghasilkan sedikit ion NH₄⁺ dan OH⁻.",
+        particleType: "weak_ions",
+        ionLabels: ["NH₄⁺", "OH⁻", "NH₄OH"]
+      },
+      {
+        id: "C6H12O6",
+        name: "Larutan Glukosa",
+        formula: "C₆H₁₂O₆",
+        molarity: "0,1 M",
+        lamp: "Padam",
+        bubbles: "Tidak Ada",
+        type: "Non-Elektrolit",
+        alpha: "α = 0 (Tidak Terionisasi)",
+        equation: "C₆H₁₂O₆(s) → C₆H₁₂O₆(aq)",
+        microDesc: "Senyawa kovalen non-elektrolit. Larut dalam air sebagai molekul netral tanpa membentuk ion bebas.",
+        particleType: "neutral_molecules",
+        ionLabels: ["C₆H₁₂O₆"]
+      },
+      {
+        id: "C2H5OH",
+        name: "Etanol (Alkohol)",
+        formula: "C₂H₅OH",
+        molarity: "0,1 M",
+        lamp: "Padam",
+        bubbles: "Tidak Ada",
+        type: "Non-Elektrolit",
+        alpha: "α = 0 (Tidak Terionisasi)",
+        equation: "C₂H₅OH(l) → C₂H₅OH(aq)",
+        microDesc: "Molekul etanol larut sempurna di dalam air tetapi tidak terionisasi menjadi ion-ion bebas.",
+        particleType: "neutral_molecules",
+        ionLabels: ["C₂H₅OH"]
+      },
+      {
+        id: "NaCl",
+        name: "Natrium Klorida (Garam)",
+        formula: "NaCl",
+        molarity: "0,1 M",
+        lamp: "Terang",
+        bubbles: "Banyak",
+        type: "Elektrolit Kuat",
+        alpha: "α = 1 (Disosiasi Sempurna)",
+        equation: "NaCl(aq) → Na⁺(aq) + Cl⁻(aq)",
+        microDesc: "Senyawa ionik yang kisi kristalnya terurai sempurna oleh molekul air menjadi ion Na⁺ dan Cl⁻ bebas.",
+        particleType: "strong_ions",
+        ionLabels: ["Na⁺", "Cl⁻"]
+      }
+    ];
+
+    /***************************************************************************
+     * 3. STRUKTUR 20 SOAL PILIHAN GANDA (A, B, C, D, E) DALAM FORMAT JSON JS
+     * Cakupan Materi:
+     * - Pengertian larutan elektrolit dan non-elektrolit
+     * - Teori Ion Svante Arrhenius & pembentukan ion bebas
+     * - Uji daya hantar listrik (nyala lampu & gelembung gas)
+     * - Klasifikasi elektrolit kuat, lemah, dan non-elektrolit
+     * - Hubungan ikatan kimia (ionik & kovalen polar) pada padatan, lelehan, larutan
+     * - Reaksi ionisasi larutan elektrolit
+     ***************************************************************************/
+    const QUESTIONS_DATA = [
+      {
+        id: 1,
+        topic: "Pengertian Larutan Elektrolit & Non-Elektrolit",
+        question: "Pernyataan berikut yang paling tepat mendefinisikan larutan elektrolit adalah...",
+        options: {
+          A: "Larutan yang zat terlarutnya selalu mengendap di dasar wadah ketika dialiri arus listrik searah (DC)",
+          B: "Larutan yang dapat menghantarkan arus listrik karena di dalamnya terdapat ion-ion yang bergerak bebas",
+          C: "Semua jenis zat cair bening yang memiliki titik didih lebih rendah daripada air murni",
+          D: "Larutan yang hanya dapat dibuat dari senyawa organik berikatan kovalen nonpolar",
+          E: "Pelarut murni yang molekul-molekulnya netral dan tidak mengalami reaksi redoks pada elektroda"
+        },
+        correctAnswer: "B",
+        explanation: "Larutan elektrolit adalah larutan yang mampu menghantarkan arus listrik karena zat terlarutnya terurai menjadi ion-ion positif (kation) dan ion-ion negatif (anion) yang bergerak bebas."
+      },
+      {
+        id: 2,
+        topic: "Pengertian Larutan Elektrolit & Non-Elektrolit",
+        question: "Larutan gula pasir (sukrosa, C₁₂H₂₂O₁₁) dan larutan urea (CO(NH₂)₂) dikelompokkan sebagai larutan non-elektrolit karena...",
+        options: {
+          A: "Zat terlarutnya tidak dapat larut di dalam pelarut air pada suhu kamar",
+          B: "Di dalam air zat terlarutnya tetap berbentuk molekul-molekul netral dan tidak terionisasi membentuk ion bebas",
+          C: "Zat terlarutnya mengalami ionisasi sempurna menghasilkan kation dan anion dalam jumlah sangat banyak",
+          D: "Kedua larutan tersebut hanya menghantarkan listrik apabila menggunakan elektroda platina",
+          E: "Derajat ionisasi (α) kedua larutan tersebut bernilai sama dengan 1"
+        },
+        correctAnswer: "B",
+        explanation: "Sukrosa dan urea larut di dalam air sebagai molekul netral (tidak terionisasi, α = 0), sehingga tidak ada ion bebas yang dapat menghantarkan muatan listrik."
+      },
+      {
+        id: 3,
+        topic: "Pengertian Larutan Elektrolit & Non-Elektrolit",
+        question: "Air suling murni (akuades) tidak menyalakan lampu pada alat uji elektrolit, tetapi air sungai atau air laut dapat menghantarkan arus listrik dengan baik. Penyebab perbedaan tersebut adalah...",
+        options: {
+          A: "Air sungai dan air laut memiliki suhu yang selalu lebih tinggi dibandingkan akuades",
+          B: "Air sungai dan air laut mengandung berbagai mineral dan garam terlarut yang terurai menjadi ion-ion bebas",
+          C: "Molekul H₂O pada air laut memiliki ikatan ionik sedangkan pada akuades berikatan logam",
+          D: "Akuades mengandung terlalu banyak gas oksigen yang menghambat aliran elektron",
+          E: "Massa molekul relatif (Mr) air laut lebih kecil dibandingkan akuades"
+        },
+        correctAnswer: "B",
+        explanation: "Air sungai dan air laut mengandung elektrolit terlarut (seperti NaCl, MgCl₂, CaSO₄) yang terionisasi menjadi ion-ion bebas penghantar arus listrik."
+      },
+      {
+        id: 4,
+        topic: "Teori Ion Svante Arrhenius",
+        question: "Menurut Teori Ion yang dikemukakan oleh Svante August Arrhenius (1887), penyebab utama suatu larutan elektrolit dapat menghantarkan arus listrik adalah...",
+        options: {
+          A: "Aliran elektron bebas yang berpindah langsung menembus molekul-molekul pelarut air tanpa melibatkan zat terlarut",
+          B: "Adanya partikel-partikel bermuatan listrik (kation dan anion) hasil ionisasi zat terlarut yang bergerak bebas menuju elektroda",
+          C: "Perubahan wujud zat terlarut dari fase cair menjadi fase gas secara spontan sebelum sakelar dinyalakan",
+          D: "Tumbukan antar molekul netral yang menghasilkan energi panas pada dinding gelas kimia",
+          E: "Terbentuknya ikatan kovalen koordinasi antara batang elektroda karbon dengan molekul air"
+        },
+        correctAnswer: "B",
+        explanation: "Svante Arrhenius menjelaskan bahwa zat elektrolit dalam air terdisosiasi/terionisasi menjadi kation (+) dan anion (-) yang bergerak bebas menuju elektroda yang berlawanan muatan."
+      },
+      {
+        id: 5,
+        topic: "Teori Ion Svante Arrhenius",
+        question: "Ketika arus listrik searah (DC) dialirkan ke dalam larutan elektrolit melalui dua batang elektroda, pergerakan ion-ion di dalam larutan yang benar adalah...",
+        options: {
+          A: "Kation (ion positif) bergerak menuju anoda (+) dan anion (ion negatif) bergerak menuju katoda (-)",
+          B: "Kation (ion positif) bergerak menuju katoda (-) dan anion (ion negatif) bergerak menuju anoda (+)",
+          C: "Baik kation maupun anion seluruhnya bergerak berkumpul di bagian dasar gelas kimia",
+          D: "Kation dan anion berhenti bergerak karena adanya medan listrik dari baterai",
+          E: "Hanya anion yang bergerak menuju kedua elektroda, sedangkan kation tetap diam"
+        },
+        correctAnswer: "B",
+        explanation: "Muatan yang berlawanan saling tarik-menarik: kation (+) bergerak ke elektroda negatif (katoda), sedangkan anion (-) bergerak ke elektroda positif (anoda)."
+      },
+      {
+        id: 6,
+        topic: "Teori Ion & Derajat Ionisasi",
+        question: "Sebanyak 0,5 mol asam lemah HA dilarutkan ke dalam air. Jika di dalam larutan terdapat 0,02 mol asam HA yang terionisasi membentuk ion H⁺ dan A⁻, maka harga derajat ionisasi (α) asam HA tersebut adalah...",
+        options: {
+          A: "0,01",
+          B: "0,02",
+          C: "0,04",
+          D: "0,25",
+          E: "0,50"
+        },
+        correctAnswer: "C",
+        explanation: "Derajat ionisasi (α) = (mol zat yang terionisasi) / (mol zat mula-mula) = 0,02 mol / 0,5 mol = 0,04."
+      },
+      {
+        id: 7,
+        topic: "Uji Daya Hantar Listrik",
+        question: "Seorang siswa menguji larutan X dengan alat uji elektrolit. Hasil pengamatan menunjukkan lampu TIDAK menyala (padam), namun pada permukaan batang elektroda terlihat adanya sedikit gelembung-gelembung gas. Berdasarkan data tersebut, larutan X adalah...",
+        options: {
+          A: "Larutan elektrolit kuat, contohnya larutan H₂SO₄",
+          B: "Larutan elektrolit lemah, contohnya larutan CH₃COOH",
+          C: "Larutan non-elektrolit, contohnya larutan glukosa C₆H₁₂O₆",
+          D: "Pelarut organik murni, contohnya minyak tanah",
+          E: "Logam cair penghantar listrik, contohnya raksa (Hg)"
+        },
+        correctAnswer: "B",
+        explanation: "Lampu padam tetapi masih ada gelembung gas pada elektroda menunjukkan adanya arus listrik lemah (sedikit ion bebas). Ini adalah ciri khas larutan elektrolit lemah seperti CH₃COOH atau NH₄OH."
+      },
+      {
+        id: 8,
+        topic: "Uji Daya Hantar Listrik",
+        question: "Perhatikan data hasil pengujian daya hantar listrik terhadap lima sampel larutan berikut:\n(1) Larutan P: Lampu menyala terang, gelembung gas banyak\n(2) Larutan Q: Lampu padam, tidak ada gelembung gas\n(3) Larutan R: Lampu menyala redup, gelembung gas sedikit\n(4) Larutan S: Lampu menyala terang, gelembung gas banyak\n(5) Larutan T: Lampu padam, gelembung gas sedikit\nPasangan larutan yang termasuk kelompok elektrolit lemah adalah...",
+        options: {
+          A: "P dan S",
+          B: "P dan R",
+          C: "Q dan T",
+          D: "R dan T",
+          E: "Q dan S"
+        },
+        correctAnswer: "D",
+        explanation: "Ciri larutan elektrolit lemah adalah lampu menyala redup atau padam, disertai sedikit gelembung gas pada elektroda (Larutan R dan T)."
+      },
+      {
+        id: 9,
+        topic: "Uji Daya Hantar Listrik",
+        question: "Munculnya gelembung-gelembung gas pada batang elektroda ketika menguji larutan elektrolit merupakan bukti terjadinya...",
+        options: {
+          A: "Pendidihan pelarut air akibat kenaikan tekanan udara di laboratorium",
+          B: "Reaksi kimia (reduksi-oksidasi) yang dialami oleh ion-ion atau molekul air di permukaan elektroda",
+          C: "Penguapan zat padat non-elektrolit menjadi kristal di sekitar kabel penghubung",
+          D: "Kebocoran udara dari pori-pori kaca gelas kimia yang digunakan",
+          E: "Pelelehan batang elektroda karbon (grafit) pada suhu ruang"
+        },
+        correctAnswer: "B",
+        explanation: "Ketika ion bergerak ke elektroda, terjadi serah-terima elektron (reaksi elektrokimia/redoks) yang menghasilkan gas (misalnya gas H₂ di katoda atau O₂/Cl₂ di anoda) berupa gelembung."
+      },
+      {
+        id: 10,
+        topic: "Uji Daya Hantar Listrik",
+        question: "Jika kita menguji larutan asam klorida (HCl 0,1 M) dan larutan asam asetat (CH₃COOH 0,1 M) pada konsentrasi dan volume yang sama, lampu pada larutan HCl menyala jauh lebih terang dibandingkan pada CH₃COOH. Hal ini disebabkan karena...",
+        options: {
+          A: "Massa molekul relatif HCl lebih besar daripada CH₃COOH",
+          B: "HCl terionisasi sempurna menghasilkan konsentrasi ion bebas yang jauh lebih banyak daripada CH₃COOH yang hanya terionisasi sebagian",
+          C: "CH₃COOH tidak dapat larut di dalam air sedangkan HCl larut sempurna",
+          D: "Molekul HCl mengandung atom oksigen yang mempercepat aliran listrik",
+          E: "Larutan CH₃COOH memiliki derajat ionisasi α = 1 sedangkan HCl memiliki α = 0"
+        },
+        correctAnswer: "B",
+        explanation: "Pada konsentrasi yang sama (0,1 M), HCl (elektrolit kuat, α = 1) menghasilkan jumlah ion bebas yang jauh lebih banyak dibandingkan CH₃COOH (elektrolit lemah, α << 1)."
+      },
+      {
+        id: 11,
+        topic: "Klasifikasi Elektrolit Kuat, Lemah, & Non-Elektrolit",
+        question: "Kelompok senyawa di bawah ini yang ketiganya merupakan larutan elektrolit kuat apabila dilarutkan di dalam air adalah...",
+        options: {
+          A: "HCl, H₂SO₄, dan CH₃COOH",
+          B: "NaOH, KCl, dan HNO₃",
+          C: "NH₄OH, HCN, dan NaCl",
+          D: "C₆H₁₂O₆, C₂H₅OH, dan CO(NH₂)₂",
+          E: "HF, H₂CO₃, dan Ba(OH)₂"
+        },
+        correctAnswer: "B",
+        explanation: "NaOH (basa kuat), KCl (garam mudah larut), dan HNO₃ (asam kuat) semuanya terionisasi sempurna (α = 1) sehingga ketiganya termasuk elektrolit kuat."
+      },
+      {
+        id: 12,
+        topic: "Klasifikasi Elektrolit Kuat, Lemah, & Non-Elektrolit",
+        question: "Di antara kelompok zat berikut yang di dalam larutannya tergolong elektrolit lemah adalah...",
+        options: {
+          A: "Asam cuka (CH₃COOH), amonia (NH₄OH), dan asam sianida (HCN)",
+          B: "Asam sulfat (H₂SO₄), kalium hidroksida (KOH), dan natrium bromida (NaBr)",
+          C: "Glukosa (C₆H₁₂O₆), sukrosa (C₁₂H₂₂O₁₁), dan etanol (C₂H₅OH)",
+          D: "Asam nitrat (HNO₃), asam perklorat (HClO₄), dan kalsium klorida (CaCl₂)",
+          E: "Urea (CO(NH₂)₂), benzena (C₆H₆), dan karbon tetraklorida (CCl₄)"
+        },
+        correctAnswer: "A",
+        explanation: "Asam lemah (seperti CH₃COOH, HCN, HF, H₂CO₃) dan basa lemah (seperti NH₄OH, Al(OH)₃) merupakan kelompok elektrolit lemah."
+      },
+      {
+        id: 13,
+        topic: "Klasifikasi Elektrolit Kuat, Lemah, & Non-Elektrolit",
+        question: "Perhatikan hubungan antara jenis larutan, nilai derajat ionisasi (α), dan contoh larutannya pada tabel berikut. Pasangan yang paling tepat adalah...",
+        options: {
+          A: "Elektrolit Kuat | α = 0 | Larutan NaCl",
+          B: "Elektrolit Lemah | α = 1 | Larutan NH₄OH",
+          C: "Non-Elektrolit | 0 < α < 1 | Larutan C₂H₅OH",
+          D: "Elektrolit Lemah | 0 < α < 1 | Larutan CH₃COOH",
+          E: "Non-Elektrolit | α = 1 | Larutan C₆H₁₂O₆"
+        },
+        correctAnswer: "D",
+        explanation: "Elektrolit kuat memiliki α = 1 (atau mendekati 1), elektrolit lemah memiliki 0 < α < 1 (contoh: CH₃COOH), dan non-elektrolit memiliki α = 0."
+      },
+      {
+        id: 14,
+        topic: "Hubungan Ikatan Kimia dengan Daya Hantar Listrik",
+        question: "Kristal garam dapur padat (NaCl(s)) tidak dapat menghantarkan arus listrik, tetapi lelehan NaCl(l) dan larutan NaCl(aq) dapat menghantarkan arus listrik dengan sangat baik. Penjelasan yang tepat untuk fenomena ini adalah...",
+        options: {
+          A: "Dalam wujud padat NaCl belum memiliki ion, sedangkan saat meleleh baru terbentuk atom-atom netral",
+          B: "Dalam wujud padat ion Na⁺ dan Cl⁻ terikat kuat dan rapat pada kisi kristal sehingga tidak bebas bergerak; sedangkan dalam lelehan dan larutan ion-ionnya dapat bergerak bebas",
+          C: "Padatan NaCl merupakan senyawa kovalen nonpolar yang berubah menjadi senyawa ionik ketika dipanaskan",
+          D: "Lelehan NaCl mengandung molekul air yang membantu menghantarkan elektron bebas",
+          E: "Dalam wujud larutan, ion Na⁺ dan Cl⁻ bergabung membentuk molekul netral NaCl₂"
+        },
+        correctAnswer: "B",
+        explanation: "Senyawa ionik seperti NaCl sudah terdiri atas ion Na⁺ dan Cl⁻ sejak wujud padat, namun dalam kristal padat ion-ionnya terperangkap erat dalam kisi kristal. Saat dilelehkan atau dilarutkan, kisi kristal lepas sehingga ion bebas bergerak."
+      },
+      {
+        id: 15,
+        topic: "Hubungan Ikatan Kimia dengan Daya Hantar Listrik",
+        question: "Asam klorida murni dalam keadaan cair tanpa air (lelehan HCl(l)) TIDAK dapat menghantarkan arus listrik, tetapi setelah dilarutkan ke dalam air menjadi HCl(aq) dapat menghantarkan listrik dengan sangat kuat. Hal ini terjadi karena...",
+        options: {
+          A: "HCl merupakan senyawa ionik yang ion-ionnya baru terbentuk saat didinginkan",
+          B: "HCl merupakan senyawa kovalen polar yang dalam keadaan murni terdiri atas molekul-molekul netral, dan baru mengalami ionisasi membentuk ion H⁺ dan Cl⁻ ketika bereaksi dengan pelarut air",
+          C: "HCl(l) memiliki titik leleh yang sangat tinggi sehingga merusak elektroda penguji",
+          D: "Di dalam air, ikatan kovalen HCl berubah menjadi ikatan logam yang menghantarkan elektron",
+          E: "Molekul HCl murni hanya dapat menghantarkan listrik dalam wujud padatan kristal"
+        },
+        correctAnswer: "B",
+        explanation: "Senyawa kovalen polar (seperti HCl, H₂SO₄, HNO₃) dalam wujud murni/lelehan masih berupa molekul kovalen netral sehingga tidak menghantarkan listrik. Saat dilarutkan dalam air (hidrolisis/ionisasi), molekul polar tersebut terurai menjadi ion bebas."
+      },
+      {
+        id: 16,
+        topic: "Hubungan Ikatan Kimia dengan Daya Hantar Listrik",
+        question: "Perhatikan data daya hantar listrik dari tiga jenis zat P, Q, dan R pada berbagai wujud berikut:\n• Zat P: Padatan (Tidak Menghantarkan), Lelehan (Menghantarkan), Larutan (Menghantarkan)\n• Zat Q: Padatan (Tidak Menghantarkan), Lelehan (Tidak Menghantarkan), Larutan (Menghantarkan)\n• Zat R: Padatan (Tidak Menghantarkan), Lelehan (Tidak Menghantarkan), Larutan (Tidak Menghantarkan)\nBerdasarkan data tersebut, jenis ikatan kimia pada zat P, Q, dan R berturut-turut adalah...",
+        options: {
+          A: "Kovalen polar, ionik, dan kovalen nonpolar",
+          B: "Ionik, kovalen polar (elektrolit), dan kovalen non-elektrolit",
+          C: "Logam, ionik, dan kovalen polar",
+          D: "Ionik, logam, dan kovalen koordinasi",
+          E: "Kovalen non-elektrolit, kovalen polar, dan ionik"
+        },
+        correctAnswer: "B",
+        explanation: "Zat P menghantarkan pada fase lelehan & larutan = Senyawa Ionik. Zat Q hanya menghantarkan pada fase larutan (aq) = Senyawa Kovalen Polar Elektrolit. Zat R tidak menghantarkan di semua fase = Senyawa Kovalen Non-Elektrolit."
+      },
+      {
+        id: 17,
+        topic: "Hubungan Ikatan Kimia dengan Daya Hantar Listrik",
+        question: "Senyawa karbon tetraklorida (CCl₄) dan minyak tanah tidak dapat menghantarkan arus listrik baik dalam wujud cair maupun ketika dicampurkan dengan air. Hal ini disebabkan karena kedua zat tersebut memiliki ikatan...",
+        options: {
+          A: "Ionik kuat yang kisi kristalnya mudah larut dalam air",
+          B: "Kovalen nonpolar yang tidak dapat membentuk ion-ion bebas",
+          C: "Kovalen polar yang terionisasi sempurna menjadi kation dan anion",
+          D: "Logam dengan lautan elektron valensi yang bergerak bebas",
+          E: "Elektrovalen antara unsur golongan alkali dan halogen"
+        },
+        correctAnswer: "B",
+        explanation: "Senyawa kovalen nonpolar (seperti CCl₄, CH₄, hidrokarbon minyak tanah) memiliki distribusi elektron simetris dan tidak terionisasi menjadi ion, sehingga bersifat non-elektrolit."
+      },
+      {
+        id: 18,
+        topic: "Reaksi Ionisasi Larutan Elektrolit",
+        question: "Persamaan reaksi ionisasi yang tepat untuk larutan asam sulfat (elektrolit kuat) di dalam air adalah...",
+        options: {
+          A: "H₂SO₄(aq) → H₂⁺(aq) + SO₄⁻(aq)",
+          B: "H₂SO₄(aq) → 2H⁺(aq) + SO₄²⁻(aq)",
+          C: "H₂SO₄(aq) ⇌ H⁺(aq) + HSO₄²⁻(aq)",
+          D: "H₂SO₄(aq) → 2H²⁺(aq) + SO₄⁴⁻(aq)",
+          E: "H₂SO₄(aq) → H₂(g) + SO₄(s)"
+        },
+        correctAnswer: "B",
+        explanation: "Asam sulfat (H₂SO₄) merupakan elektrolit kuat yang terionisasi sempurna (tanda panah satu arah) menghasilkan 2 ion hidrogen (2H⁺) dan 1 ion sulfat (SO₄²⁻)."
+      },
+      {
+        id: 19,
+        topic: "Reaksi Ionisasi Larutan Elektrolit",
+        question: "Di antara penulisan persamaan reaksi ionisasi berikut yang menggunakan tanda panah kesetimbangan bolak-balik (⇌) karena zat terlarutnya terionisasi sebagian (elektrolit lemah) adalah...",
+        options: {
+          A: "NaCl(aq) ⇌ Na⁺(aq) + Cl⁻(aq)",
+          B: "KOH(aq) ⇌ K⁺(aq) + OH⁻(aq)",
+          C: "CH₃COOH(aq) ⇌ H⁺(aq) + CH₃COO⁻(aq)",
+          D: "HNO₃(aq) ⇌ H⁺(aq) + NO₃⁻(aq)",
+          E: "BaCl₂(aq) ⇌ Ba²⁺(aq) + 2Cl⁻(aq)"
+        },
+        correctAnswer: "C",
+        explanation: "Elektrolit lemah seperti asam asetat (CH₃COOH) mengalami reaksi ionisasi reversibel/kesetimbangan (⇌) karena hanya sebagian kecil molekul yang terurai menjadi ion."
+      },
+      {
+        id: 20,
+        topic: "Reaksi Ionisasi Larutan Elektrolit",
+        question: "Apabila garam kalsium klorida (CaCl₂) dan aluminium sulfat (Al₂(SO₄)₃) masing-masing terionisasi sempurna di dalam air:\nCaCl₂(aq) → Ca²⁺(aq) + 2Cl⁻(aq)\nAl₂(SO₄)₃(aq) → 2Al³⁺(aq) + 3SO₄²⁻(aq)\nJumlah total ion yang dihasilkan dari setiap 1 satuan rumus CaCl₂ dan Al₂(SO₄)₃ berturut-turut adalah...",
+        options: {
+          A: "2 ion dan 3 ion",
+          B: "2 ion dan 5 ion",
+          C: "3 ion dan 5 ion",
+          D: "3 ion dan 6 ion",
+          E: "4 ion dan 5 ion"
+        },
+        correctAnswer: "C",
+        explanation: "1 satuan rumus CaCl₂ menghasilkan 1 ion Ca²⁺ + 2 ion Cl⁻ = 3 ion. Sedangkan 1 satuan rumus Al₂(SO₄)₃ menghasilkan 2 ion Al³⁺ + 3 ion SO₄²⁻ = 5 ion."
+      }
+    ];
+
+    /***************************************************************************
+     * 4. STATE APLIKASI E-LKPD
+     ***************************************************************************/
+    const appState = {
+      currentStep: 0, // 0 = Identitas, 1..6 = Sintaks Inkuiri, 7 = Hasil Akhir
+      isLocked: false,
+      student: {
+        nama: "",
+        kelas: "",
+        absen: ""
+      },
+      orientCheckAnswer: "",
+      problemChoice: null,
+      varBebas: "",
+      varTerikat: "",
+      hypothesisChoice: null,
+      labCurrentIndex: 0,
+      labPowerOn: false,
+      labTestedIds: {},
+      observations: {}, // { HCl: { lamp: '', bubbles: '', type: '' }, ... }
+      quizAnswers: {},  // { 1: 'B', 2: 'B', ... }
+      conclusion: {
+        hypoConfirm: "",
+        c1: "",
+        c2: "",
+        c3: "",
+        c4: ""
+      },
+      finalResult: null
+    };
+
+    // Inisialisasi struktur tabel pengamatan kosong untuk 7 larutan
+    LAB_SOLUTIONS.forEach(sol => {
+      appState.observations[sol.id] = {
+        lamp: "",
+        bubbles: "",
+        type: ""
+      };
+    });
+
+    const STEP_META = {
+      1: { title: "Sintaks 1/6", subtitle: "Orientasi Fenomena", progress: 16 },
+      2: { title: "Sintaks 2/6", subtitle: "Merumuskan Masalah", progress: 32 },
+      3: { title: "Sintaks 3/6", subtitle: "Merumuskan Hipotesis", progress: 48 },
+      4: { title: "Sintaks 4/6", subtitle: "Mengumpulkan Data Lab", progress: 65 },
+      5: { title: "Sintaks 5/6", subtitle: "Menguji Hipotesis (20 Soal)", progress: 84 },
+      6: { title: "Sintaks 6/6", subtitle: "Merumuskan Kesimpulan", progress: 96 },
+      7: { title: "Selesai", subtitle: "Rekapitulasi Nilai Akhir", progress: 100 }
+    };
+
+    /***************************************************************************
+     * 5. FUNGSI TOAST & MODAL UTILITAS (TANPA ALERT / CONFIRM BAWAAN)
+     ***************************************************************************/
+    let toastTimer = null;
+    function showToast(message, type = "warning") {
+      const banner = document.getElementById("toastBanner");
+      const icon = document.getElementById("toastIcon");
+      const text = document.getElementById("toastMessage");
+
+      text.textContent = message;
+      icon.className = "fa-solid text-lg shrink-0 ";
+      if (type === "success") {
+        icon.className += "fa-circle-check text-emerald-400";
+      } else if (type === "error") {
+        icon.className += "fa-circle-xmark text-rose-400";
+      } else {
+        icon.className += "fa-circle-exclamation text-amber-400";
+      }
+
+      banner.classList.remove("hidden");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(hideToast, 3600);
+    }
+
+    function hideToast() {
+      document.getElementById("toastBanner").classList.add("hidden");
+    }
+
+    /***************************************************************************
+     * 6. VALIDASI IDENTITAS & NAVIGASI WIZARD SINTAKS 1 - 6
+     ***************************************************************************/
+    function startLearning() {
+      const nama = document.getElementById("inputNama").value.trim();
+      const kelas = document.getElementById("inputKelas").value.trim();
+      const absen = document.getElementById("inputAbsen").value.trim();
+      const errBox = document.getElementById("loginErrorBox");
+
+      if (!nama || !kelas || !absen) {
+        errBox.classList.remove("hidden");
+        showToast("Mohon lengkapi Nama Lengkap, Kelas, dan Nomor Absen terlebih dahulu!", "error");
+        return;
+      }
+
+      errBox.classList.add("hidden");
+      appState.student.nama = nama;
+      appState.student.kelas = kelas;
+      appState.student.absen = absen;
+
+      document.getElementById("headerStudentName").textContent = nama;
+      document.getElementById("headerStudentClass").textContent = `${kelas} (No. ${absen})`;
+      document.getElementById("studentHeaderBar").classList.remove("hidden");
+      document.getElementById("bottomNavBar").classList.remove("hidden");
+
+      goToStep(1);
+    }
+
+    function goToStep(stepNum) {
+      if (stepNum < 1) return;
+      if (stepNum === 7 && !appState.isLocked) {
+        showToast("Selesaikan dan kirim E-LKPD terlebih dahulu untuk melihat halaman hasil akhir.", "warning");
+        return;
+      }
+
+      appState.currentStep = stepNum;
+
+      // Sembunyikan semua section, tampilkan section aktif
+      document.querySelectorAll(".step-section").forEach(sec => sec.classList.add("hidden"));
+      const target = document.getElementById(`step-${stepNum}`);
+      if (target) target.classList.remove("hidden");
+
+      // Update Progress Bar & Header
+      const meta = STEP_META[stepNum] || { title: "", subtitle: "", progress: 100 };
+      document.getElementById("progressPercentText").textContent = meta.title;
+      document.getElementById("topProgressBar").style.width = `${meta.progress}%`;
+
+      // Update Step Pills
+      for (let i = 1; i <= 7; i++) {
+        const pill = document.getElementById(`pill-${i}`);
+        if (!pill) continue;
+        if (i === stepNum) {
+          pill.className = "step-pill shrink-0 px-3 py-1 rounded-lg text-[11px] font-extrabold bg-indigo-600 text-white shadow-sm transition flex items-center gap-1";
+        } else {
+          pill.className = "step-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition flex items-center gap-1";
+        }
+      }
+
+      // Update Bottom Navigation Bar
+      const bottomBar = document.getElementById("bottomNavBar");
+      if (stepNum === 0) {
+        bottomBar.classList.add("hidden");
+      } else {
+        bottomBar.classList.remove("hidden");
+        document.getElementById("bottomStepTitle").textContent = meta.title;
+        document.getElementById("bottomStepSubtitle").textContent = meta.subtitle;
+
+        const btnPrev = document.getElementById("btnPrevStep");
+        const btnNext = document.getElementById("btnNextStep");
+        const btnNextLabel = document.getElementById("btnNextStepLabel");
+
+        btnPrev.disabled = (stepNum === 1);
+        btnPrev.classList.toggle("opacity-40", stepNum === 1);
+
+        if (stepNum === 6 && !appState.isLocked) {
+          btnNextLabel.textContent = "Kirim LKPD";
+          btnNext.onclick = openConfirmSubmitModal;
+        } else if (stepNum === 7) {
+          btnNextLabel.textContent = "Selesai";
+          btnNext.disabled = true;
+          btnNext.classList.add("opacity-40");
+        } else {
+          btnNext.disabled = false;
+          btnNext.classList.remove("opacity-40");
+          btnNextLabel.textContent = "Selanjutnya";
+          btnNext.onclick = nextStep;
+        }
+      }
+
+      if (stepNum === 6) {
+        refreshPreSubmitSummary();
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function nextStep() {
+      if (appState.currentStep < 6) {
+        goToStep(appState.currentStep + 1);
+      } else if (appState.currentStep === 6 && appState.isLocked) {
+        goToStep(7);
+      }
+    }
+
+    function prevStep() {
+      if (appState.currentStep > 1) {
+        goToStep(appState.currentStep - 1);
+      }
+    }
+
+    /***************************************************************************
+     * 7. SINTAKS 1: SIMULASI VISUAL FENOMENA ORIENTASI
+     ***************************************************************************/
+    const ORIENT_SAMPLES = {
+      water: {
+        title: "Sampel 1: Air Suling Murni (H₂O)",
+        lamp: "Padam (Tidak Menyala)",
+        lampClass: "text-slate-300",
+        bubbles: "Tidak Ada Gelembung",
+        bubbleClass: "text-slate-300",
+        particles: "Molekul H₂O Netral",
+        desc: "Air murni hampir tidak memiliki ion-ion bebas sehingga lampu tetap padam dan tidak muncul gelembung gas.",
+        bulbState: "off",
+        bubbleState: "none",
+        particleState: "neutral",
+        labels: ["H₂O"]
+      },
+      salt: {
+        title: "Sampel 2: Larutan Garam Dapur (NaCl)",
+        lamp: "Menyala Terang",
+        lampClass: "text-amber-300",
+        bubbles: "Banyak Gelembung Gas",
+        bubbleClass: "text-emerald-300",
+        particles: "Ion Bebas (Na⁺ & Cl⁻)",
+        desc: "Garam dapur (NaCl) terurai sempurna menjadi ion Na⁺ dan Cl⁻ yang bergerak bebas menghantarkan arus listrik.",
+        bulbState: "bright",
+        bubbleState: "many",
+        particleState: "strong",
+        labels: ["Na⁺", "Cl⁻"]
+      },
+      vinegar: {
+        title: "Sampel 3: Larutan Asam Cuka (CH₃COOH)",
+        lamp: "Menyala Redup",
+        lampClass: "text-yellow-200",
+        bubbles: "Sedikit Gelembung Gas",
+        bubbleClass: "text-cyan-300",
+        particles: "Sedikit Ion (H⁺ & CH₃COO⁻)",
+        desc: "Asam cuka hanya terionisasi sebagian kecil di dalam air sehingga daya hantar listriknya lemah (lampu redup).",
+        bulbState: "dim",
+        bubbleState: "few",
+        particleState: "weak",
+        labels: ["H⁺", "Ac⁻", "CH₃COOH"]
+      },
+      sugar: {
+        title: "Sampel 4: Larutan Gula Pasir (C₁₂H₂₂O₁₁)",
+        lamp: "Padam (Tidak Menyala)",
+        lampClass: "text-slate-300",
+        bubbles: "Tidak Ada Gelembung",
+        bubbleClass: "text-slate-300",
+        particles: "Molekul Gula Netral",
+        desc: "Meskipun larut sempurna, molekul gula pasir tidak terionisasi menjadi ion bebas sehingga tidak menghantarkan listrik.",
+        bulbState: "off",
+        bubbleState: "none",
+        particleState: "neutral",
+        labels: ["Gula"]
+      }
+    };
+
+    function setOrientationDemo(key) {
+      const sample = ORIENT_SAMPLES[key];
+      if (!sample) return;
+
+      // Highlight tombol aktif
+      ["water", "salt", "vinegar", "sugar"].forEach(k => {
+        const btn = document.getElementById(`orient-btn-${k}`);
+        if (k === key) {
+          btn.className = "orient-sample-btn p-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-950 text-left transition shadow-sm";
+        } else {
+          btn.className = "orient-sample-btn p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-left transition";
+        }
+      });
+
+      document.getElementById("orientTitleText").textContent = sample.title;
+      const lampEl = document.getElementById("orientLampBadge");
+      lampEl.textContent = sample.lamp;
+      lampEl.className = `font-bold ${sample.lampClass}`;
+
+      const bubEl = document.getElementById("orientBubbleBadge");
+      bubEl.textContent = sample.bubbles;
+      bubEl.className = `font-bold ${sample.bubbleClass}`;
+
+      document.getElementById("orientParticleBadge").textContent = sample.particles;
+      document.getElementById("orientDescText").textContent = sample.desc;
+
+      // Update SVG Bulb, Bubbles, and Particles
+      updateSvgApparatus(
+        "orientBulbGlass",
+        "orientBulbHalo",
+        "orientBubblesGroup",
+        "orientParticlesGroup",
+        sample.bulbState,
+        sample.bubbleState,
+        sample.particleState,
+        sample.labels
+      );
+    }
+
+    function saveOrientCheck(val) {
+      if (appState.isLocked) return;
+      appState.orientCheckAnswer = val;
+      const fb = document.getElementById("orientFeedback");
+      fb.classList.remove("hidden");
+      if (val === "B") {
+        fb.className = "text-xs font-semibold p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800";
+        fb.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Tepat sekali! Indikator makroskopis daya hantar listrik larutan adalah nyala lampu bohlam dan munculnya gelembung gas pada permukaan elektroda.`;
+      } else {
+        fb.className = "text-xs font-semibold p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800";
+        fb.innerHTML = `<i class="fa-solid fa-lightbulb mr-1"></i> Perhatikan kembali lampu bohlam di bagian atas dan permukaan batang elektroda karbon di dalam gelas kimia saat sampel garam atau cuka dipilih.`;
+      }
+    }
+
+    /***************************************************************************
+     * 8. HELPER PENGGAMBARAN SVG BOHLAM, GELEMBUNG, & PARTIKEL ION
+     ***************************************************************************/
+    function updateSvgApparatus(glassId, haloId, bubblesGroupId, particlesGroupId, bulbState, bubbleState, particleState, labels) {
+      const glass = document.getElementById(glassId);
+      const halo = document.getElementById(haloId);
+      const bubblesGroup = document.getElementById(bubblesGroupId);
+      const particlesGroup = document.getElementById(particlesGroupId);
+
+      // 1. Efek Nyala Lampu Bohlam
+      glass.classList.remove("glow-bright", "glow-dim");
+      if (bulbState === "bright") {
+        glass.setAttribute("fill", "#fde047");
+        glass.setAttribute("stroke", "#facc15");
+        glass.classList.add("glow-bright");
+        halo.setAttribute("opacity", "0.55");
+      } else if (bulbState === "dim") {
+        glass.setAttribute("fill", "#fef08a");
+        glass.setAttribute("stroke", "#eab308");
+        glass.classList.add("glow-dim");
+        halo.setAttribute("opacity", "0.22");
+      } else {
+        glass.setAttribute("fill", "#334155");
+        glass.setAttribute("stroke", "#94a3b8");
+        halo.setAttribute("opacity", "0");
+      }
+
+      // 2. Gelembung Gas pada Elektroda (x=105 dan x=175)
+      let bubblesHtml = "";
+      if (bubbleState === "many") {
+        const coords = [
+          { x: 98, y: 192, r: 3.2, d: "0s" },
+          { x: 112, y: 185, r: 2.8, d: "0.3s" },
+          { x: 100, y: 175, r: 3.5, d: "0.6s" },
+          { x: 111, y: 168, r: 2.5, d: "0.9s" },
+          { x: 99, y: 158, r: 3.0, d: "1.2s" },
+          { x: 168, y: 192, r: 3.2, d: "0.15s" },
+          { x: 182, y: 184, r: 2.9, d: "0.45s" },
+          { x: 169, y: 174, r: 3.4, d: "0.75s" },
+          { x: 181, y: 165, r: 2.6, d: "1.05s" },
+          { x: 170, y: 155, r: 3.1, d: "1.35s" }
+        ];
+        coords.forEach(b => {
+          bubblesHtml += `<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="#e0f2fe" opacity="0.85" class="bubble-anim" style="animation-delay:${b.d}" />`;
+        });
+      } else if (bubbleState === "few") {
+        const coords = [
+          { x: 99, y: 188, r: 2.5, d: "0.2s" },
+          { x: 111, y: 172, r: 2.3, d: "1.1s" },
+          { x: 169, y: 186, r: 2.5, d: "0.6s" },
+          { x: 181, y: 170, r: 2.2, d: "1.5s" }
+        ];
+        coords.forEach(b => {
+          bubblesHtml += `<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="#e0f2fe" opacity="0.75" class="bubble-anim-slow" style="animation-delay:${b.d}" />`;
+        });
+      }
+      bubblesGroup.innerHTML = bubblesHtml;
+
+      // 3. Partikel Mikroskopis di dalam Larutan
+      let partHtml = "";
+      const posList = [
+        { x: 92, y: 155 }, { x: 126, y: 152 }, { x: 152, y: 156 }, { x: 190, y: 154 },
+        { x: 118, y: 178 }, { x: 142, y: 182 }, { x: 162, y: 176 },
+        { x: 95, y: 198 }, { x: 132, y: 202 }, { x: 156, y: 199 }, { x: 188, y: 197 }
+      ];
+
+      if (particleState === "strong" || particleState === "strong_ions") {
+        posList.forEach((p, idx) => {
+          const isCation = idx % 2 === 0;
+          const color = isCation ? "#ef4444" : "#10b981";
+          const lbl = isCation ? (labels[0] || "+") : (labels[1] || "-");
+          partHtml += `
+            <g class="ion-particle" style="animation-delay:${(idx * 0.2).toFixed(1)}s">
+              <circle cx="${p.x}" cy="${p.y}" r="8" fill="${color}" opacity="0.92" />
+              <text x="${p.x}" y="${p.y + 3}" text-anchor="middle" fill="#ffffff" font-size="6.5" font-weight="bold">${lbl}</text>
+            </g>`;
+        });
+      } else if (particleState === "weak" || particleState === "weak_ions") {
+        posList.forEach((p, idx) => {
+          if (idx < 3) {
+            const isCation = idx % 2 === 0;
+            const color = isCation ? "#ef4444" : "#10b981";
+            const lbl = isCation ? (labels[0] || "+") : (labels[1] || "-");
+            partHtml += `
+              <g class="ion-particle" style="animation-delay:${(idx * 0.3).toFixed(1)}s">
+                <circle cx="${p.x}" cy="${p.y}" r="8" fill="${color}" opacity="0.9" />
+                <text x="${p.x}" y="${p.y + 3}" text-anchor="middle" fill="#ffffff" font-size="6.5" font-weight="bold">${lbl}</text>
+              </g>`;
+          } else {
+            partHtml += `
+              <g opacity="0.75">
+                <circle cx="${p.x}" cy="${p.y}" r="7.5" fill="#64748b" />
+                <text x="${p.x}" y="${p.y + 2.5}" text-anchor="middle" fill="#e2e8f0" font-size="5.5">Mol</text>
+              </g>`;
+          }
+        });
+      } else {
+        posList.slice(0, 7).forEach(p => {
+          partHtml += `
+            <g opacity="0.75">
+              <circle cx="${p.x}" cy="${p.y}" r="8" fill="#64748b" />
+              <text x="${p.x}" y="${p.y + 2.5}" text-anchor="middle" fill="#f1f5f9" font-size="5.5">Netral</text>
+            </g>`;
+        });
+      }
+      particlesGroup.innerHTML = partHtml;
+    }
+
+    /***************************************************************************
+     * 9. SINTAKS 2 & 3: LOGIKA RUMUSAN MASALAH & HIPOTESIS
+     ***************************************************************************/
+    function selectProblem(choice) {
+      if (appState.isLocked) return;
+      appState.problemChoice = choice;
+      const box = document.getElementById("problemFeedbackBox");
+      box.classList.remove("hidden");
+
+      if (choice === 2) {
+        box.className = "p-3 rounded-xl text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-800";
+        box.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Rumusan masalah sangat tepat! Pertanyaan ini menghubungkan perbedaan daya hantar listrik larutan dengan keberadaan ion-ion bebas di dalamnya.`;
+      } else {
+        box.className = "p-3 rounded-xl text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800";
+        box.innerHTML = `<i class="fa-solid fa-circle-info mr-1"></i> Kurang tepat. Pilihlah rumusan masalah yang menanyakan penyebab perbedaan daya hantar listrik larutan (elektrolit kuat, lemah, non-elektrolit) dan kaitannya dengan ion bebas.`;
+      }
+    }
+
+    function checkVariables() {
+      if (appState.isLocked) return;
+      const bebas = document.getElementById("varBebasSelect").value;
+      const terikat = document.getElementById("varTerikatSelect").value;
+      appState.varBebas = bebas;
+      appState.varTerikat = terikat;
+
+      const fb = document.getElementById("variableFeedbackBox");
+      if (!bebas || !terikat) {
+        fb.classList.add("hidden");
+        return;
+      }
+
+      fb.classList.remove("hidden");
+      if (bebas === "jenis_larutan" && terikat === "gejala_hantaran") {
+        fb.className = "p-2.5 rounded-xl text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-800";
+        fb.innerHTML = `<i class="fa-solid fa-check mr-1"></i> Tepat! Variabel bebas adalah jenis larutan yang diuji, dan variabel terikat adalah gejala daya hantar listrik (nyala lampu & gelembung gas).`;
+      } else {
+        fb.className = "p-2.5 rounded-xl text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800";
+        fb.innerHTML = `<i class="fa-solid fa-circle-exclamation mr-1"></i> Cermati kembali: Apa yang kita variasikan pada 7 gelas kimia (variabel bebas), dan apa yang kita amati pada lampu/elektroda (variabel terikat)?`;
+      }
+    }
+
+    function selectHypothesis(choice) {
+      if (appState.isLocked) return;
+      appState.hypothesisChoice = choice;
+      const box = document.getElementById("hypothesisFeedbackBox");
+      box.classList.remove("hidden");
+
+      if (choice === 2) {
+        box.className = "p-3 rounded-xl text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-800";
+        box.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Hipotesis ilmiah yang sangat baik! Sekarang mari kita uji kebenaran hipotesis ini melalui pengumpulan data eksperimen pada Sintaks 4.`;
+      } else {
+        box.className = "p-3 rounded-xl text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800";
+        box.innerHTML = `<i class="fa-solid fa-lightbulb mr-1"></i> Pertimbangkan kembali Teori Ion Arrhenius: bagaimana kaitan antara derajat ionisasi (sempurna, sebagian, tidak terionisasi) dengan jumlah ion bebas dan nyala lampu?`;
+      }
+    }
+
+    /***************************************************************************
+     * 10. SINTAKS 4: LABORATORIUM VIRTUAL & TABEL PENGAMATAN 7 LARUTAN
+     ***************************************************************************/
+    function renderLabSolutionButtons() {
+      const container = document.getElementById("labSolutionButtons");
+      let html = "";
+      LAB_SOLUTIONS.forEach((sol, idx) => {
+        const isSelected = idx === appState.labCurrentIndex;
+        const isTested = !!appState.labTestedIds[sol.id];
+        html += `
+          <button type="button" onclick="selectLabSolution(${idx})"
+            class="p-2.5 rounded-xl border text-left transition flex items-center justify-between ${
+              isSelected
+                ? "border-2 border-indigo-600 bg-indigo-50 text-indigo-950 shadow-sm"
+                : "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700"
+            }">
+            <div class="truncate pr-1">
+              <div class="text-xs font-extrabold truncate">${idx + 1}. ${sol.formula}</div>
+              <div class="text-[10px] text-slate-500 truncate">${sol.name}</div>
+            </div>
+            ${
+              isTested
+                ? `<i class="fa-solid fa-circle-check text-emerald-500 text-xs shrink-0" title="Sudah diuji"></i>`
+                : `<i class="fa-regular fa-circle text-slate-300 text-xs shrink-0"></i>`
+            }
+          </button>`;
+      });
+      container.innerHTML = html;
+
+      const testedCount = Object.keys(appState.labTestedIds).length;
+      document.getElementById("labTestedCountBadge").textContent = `${testedCount}/7 Diuji`;
+    }
+
+    function selectLabSolution(idx) {
+      appState.labCurrentIndex = idx;
+      appState.labPowerOn = false;
+      updateLabSimulatorUI();
+      renderLabSolutionButtons();
+    }
+
+    function toggleLabPower() {
+      appState.labPowerOn = !appState.labPowerOn;
+      const sol = LAB_SOLUTIONS[appState.labCurrentIndex];
+      if (appState.labPowerOn && sol) {
+        appState.labTestedIds[sol.id] = true;
+      }
+      updateLabSimulatorUI();
+      renderLabSolutionButtons();
+    }
+
+    function updateLabSimulatorUI() {
+      const sol = LAB_SOLUTIONS[appState.labCurrentIndex];
+      if (!sol) return;
+
+      document.getElementById("labCurrentSolutionTitle").textContent =
+        `${appState.labCurrentIndex + 1}. ${sol.name} (${sol.formula} ${sol.molarity})`;
+
+      const switchBtn = document.getElementById("labSwitchBtn");
+      const switchLabel = document.getElementById("labSwitchLabel");
+      const svgSwitchBox = document.getElementById("labSvgSwitchBox");
+      const svgSwitchText = document.getElementById("labSvgSwitchText");
+      const statusPill = document.getElementById("labPowerStatusPill");
+
+      const readoutLamp = document.getElementById("labReadoutLamp");
+      const readoutBubbles = document.getElementById("labReadoutBubbles");
+      const readoutEq = document.getElementById("labReadoutEquation");
+      const readoutMicro = document.getElementById("labReadoutMicro");
+
+      if (!appState.labPowerOn) {
+        switchBtn.className = "px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition shadow-md bg-rose-600 hover:bg-rose-500 text-white";
+        switchLabel.textContent = "Sakelar: OFF (Sentuh untuk Uji)";
+        svgSwitchBox.setAttribute("fill", "#dc2626");
+        svgSwitchBox.setAttribute("stroke", "#f87171");
+        svgSwitchText.textContent = "OFF";
+
+        statusPill.textContent = "Arus Terputus";
+        statusPill.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30";
+
+        readoutLamp.textContent = "Padam (Sakelar OFF)";
+        readoutLamp.className = "font-bold text-slate-400 mt-0.5";
+        readoutBubbles.textContent = "Tidak Ada (Sakelar OFF)";
+        readoutBubbles.className = "font-bold text-slate-400 mt-0.5";
+        readoutEq.textContent = "Hubungkan sakelar untuk mengalirkan arus DC";
+        readoutMicro.textContent = "";
+
+        updateSvgApparatus("labBulbGlass", "labBulbHalo", "labBubblesGroup", "labParticlesGroup", "off", "none", "neutral", []);
+      } else {
+        switchBtn.className = "px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition shadow-md bg-emerald-600 hover:bg-emerald-500 text-white";
+        switchLabel.textContent = "Sakelar: ON (Arus Mengalir)";
+        svgSwitchBox.setAttribute("fill", "#059669");
+        svgSwitchBox.setAttribute("stroke", "#34d399");
+        svgSwitchText.textContent = "ON";
+
+        statusPill.textContent = "Arus Mengalir (ON)";
+        statusPill.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+
+        // Tentukan visual berdasarkan sifat larutan
+        let bulbState = "off";
+        let bubbleState = "none";
+        if (sol.lamp === "Terang") {
+          bulbState = "bright";
+          readoutLamp.textContent = "Menyala Terang";
+          readoutLamp.className = "font-extrabold text-amber-300 mt-0.5";
+        } else if (sol.lamp === "Redup") {
+          bulbState = "dim";
+          readoutLamp.textContent = "Menyala Redup";
+          readoutLamp.className = "font-extrabold text-yellow-200 mt-0.5";
+        } else {
+          bulbState = "off";
+          readoutLamp.textContent = "Padam (Tidak Menyala)";
+          readoutLamp.className = "font-bold text-slate-300 mt-0.5";
+        }
+
+        if (sol.bubbles === "Banyak") {
+          bubbleState = "many";
+          readoutBubbles.textContent = "Banyak Gelembung";
+          readoutBubbles.className = "font-extrabold text-emerald-300 mt-0.5";
+        } else if (sol.bubbles === "Sedikit") {
+          bubbleState = "few";
+          readoutBubbles.textContent = "Sedikit Gelembung";
+          readoutBubbles.className = "font-extrabold text-cyan-300 mt-0.5";
+        } else {
+          bubbleState = "none";
+          readoutBubbles.textContent = "Tidak Ada Gelembung";
+          readoutBubbles.className = "font-bold text-slate-300 mt-0.5";
+        }
+
+        readoutEq.textContent = `${sol.equation}  [${sol.alpha}]`;
+        readoutMicro.textContent = sol.microDesc;
+
+        updateSvgApparatus(
+          "labBulbGlass",
+          "labBulbHalo",
+          "labBubblesGroup",
+          "labParticlesGroup",
+          bulbState,
+          bubbleState,
+          sol.particleType,
+          sol.ionLabels
+        );
+      }
+    }
+
+    // Render Kartu Tabel Pengamatan Interaktif (7 Larutan)
+    function renderObservationTable() {
+      const container = document.getElementById("observationCardsContainer");
+      let html = "";
+
+      const lampOptions = ["Terang", "Redup", "Padam"];
+      const bubbleOptions = ["Banyak", "Sedikit", "Tidak Ada"];
+      const typeOptions = ["Elektrolit Kuat", "Elektrolit Lemah", "Non-Elektrolit"];
+
+      LAB_SOLUTIONS.forEach((sol, idx) => {
+        const obs = appState.observations[sol.id];
+        const isComplete = obs.lamp && obs.bubbles && obs.type;
+
+        html += `
+          <div id="obs-card-${sol.id}" class="p-3.5 rounded-2xl border ${
+            isComplete ? "border-indigo-200 bg-indigo-50/30" : "border-slate-200 bg-slate-50/70"
+          } space-y-3 transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white text-xs font-extrabold flex items-center justify-center">${idx + 1}</span>
+                <div>
+                  <span class="text-xs sm:text-sm font-extrabold text-slate-800">${sol.name}</span>
+                  <span class="text-xs font-mono font-semibold text-indigo-700 ml-1">(${sol.formula})</span>
+                </div>
+              </div>
+              <span id="obs-status-${sol.id}" class="text-[11px] font-bold ${
+                isComplete ? "text-emerald-600" : "text-slate-400"
+              }">
+                ${isComplete ? '<i class="fa-solid fa-check-circle mr-0.5"></i>Terisi' : "Belum Lengkap"}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+              <!-- Toggle Nyala Lampu -->
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                <div class="text-[11px] font-bold text-slate-500 mb-1.5">Nyala Lampu:</div>
+                <div class="grid grid-cols-3 gap-1">
+                  ${lampOptions.map(opt => `
+                    <button type="button" onclick="setObservationValue('${sol.id}', 'lamp', '${opt}')"
+                      class="py-1.5 px-1 rounded-lg text-[11px] font-bold border transition ${
+                        obs.lamp === opt
+                          ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                      }">${opt}</button>
+                  `).join("")}
+                </div>
+              </div>
+
+              <!-- Toggle Gelembung Gas -->
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                <div class="text-[11px] font-bold text-slate-500 mb-1.5">Gelembung Gas:</div>
+                <div class="grid grid-cols-3 gap-1">
+                  ${bubbleOptions.map(opt => `
+                    <button type="button" onclick="setObservationValue('${sol.id}', 'bubbles', '${opt}')"
+                      class="py-1.5 px-1 rounded-lg text-[11px] font-bold border transition ${
+                        obs.bubbles === opt
+                          ? "bg-cyan-600 text-white border-cyan-600 shadow-sm"
+                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                      }">${opt}</button>
+                  `).join("")}
+                </div>
+              </div>
+
+              <!-- Toggle Sifat Larutan -->
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                <div class="text-[11px] font-bold text-slate-500 mb-1.5">Sifat Larutan:</div>
+                <div class="grid grid-cols-3 gap-1">
+                  ${typeOptions.map(opt => {
+                    const shortLabel = opt.replace("Elektrolit ", "E. ");
+                    return `
+                      <button type="button" onclick="setObservationValue('${sol.id}', 'type', '${opt}')"
+                        class="py-1.5 px-1 rounded-lg text-[10px] font-bold border transition ${
+                          obs.type === opt
+                            ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                        }">${shortLabel}</button>`;
+                  }).join("")}
+                </div>
+              </div>
+            </div>
+          </div>`;
+      });
+
+      container.innerHTML = html;
+      updateObservationProgressBadge();
+    }
+
+    function setObservationValue(solId, field, value) {
+      if (appState.isLocked) {
+        showToast("Jawaban E-LKPD sudah dikunci dan tidak dapat diubah lagi.", "warning");
+        return;
+      }
+      if (!appState.observations[solId]) return;
+      appState.observations[solId][field] = value;
+      renderObservationTable();
+    }
+
+    function updateObservationProgressBadge() {
+      let completeCount = 0;
+      LAB_SOLUTIONS.forEach(sol => {
+        const o = appState.observations[sol.id];
+        if (o.lamp && o.bubbles && o.type) completeCount++;
+      });
+      document.getElementById("obsProgressBadge").textContent = `${completeCount}/7 Lengkap`;
+      return completeCount;
+    }
+
+    function verifyObservationTable() {
+      let correctRows = 0;
+      let filledRows = 0;
+
+      LAB_SOLUTIONS.forEach(sol => {
+        const o = appState.observations[sol.id];
+        if (o.lamp && o.bubbles && o.type) filledRows++;
+        const isRowCorrect = (o.lamp === sol.lamp && o.bubbles === sol.bubbles && o.type === sol.type);
+        if (isRowCorrect) correctRows++;
+      });
+
+      const summaryEl = document.getElementById("obsCheckSummaryText");
+      if (filledRows < 7) {
+        summaryEl.className = "text-xs font-bold text-amber-700";
+        summaryEl.textContent = `Baru ${filledRows}/7 baris larutan yang diisi lengkap. Silakan lengkapi seluruh larutan!`;
+        showToast(`Lengkapi pengamatan untuk ketujuh larutan terlebih dahulu (${filledRows}/7).`, "warning");
+      } else if (correctRows === 7) {
+        summaryEl.className = "text-xs font-bold text-emerald-700";
+        summaryEl.textContent = "Luar biasa! 7 dari 7 data pengamatan larutan telah sesuai dengan hasil eksperimen.";
+        showToast("Semua data tabel pengamatan (7/7) tepat!", "success");
+      } else {
+        summaryEl.className = "text-xs font-bold text-indigo-700";
+        summaryEl.textContent = `${correctRows} dari 7 larutan sudah tepat. Coba uji ulang larutan yang masih keliru pada Virtual Lab!`;
+        showToast(`${correctRows}/7 baris tabel pengamatan tepat. Periksa kembali sisanya!`, "warning");
+      }
+    }
+
+    /***************************************************************************
+     * 11. SINTAKS 5: RENDER & LOGIKA 20 SOAL PILIHAN GANDA (A, B, C, D, E)
+     ***************************************************************************/
+    function renderQuizSection() {
+      // 1. Render Grid Nomor Soal 1..20
+      const grid = document.getElementById("quizNumberGrid");
+      let gridHtml = "";
+      QUESTIONS_DATA.forEach(q => {
+        const answered = !!appState.quizAnswers[q.id];
+        gridHtml += `
+          <button type="button" onclick="scrollToQuestion(${q.id})" id="qnav-${q.id}"
+            class="h-8 rounded-lg text-xs font-extrabold border transition ${
+              answered
+                ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+            }">
+            ${q.id}
+          </button>`;
+      });
+      grid.innerHTML = gridHtml;
+
+      // 2. Render Kartu 20 Soal Pilihan Ganda
+      const container = document.getElementById("quizQuestionsContainer");
+      let qHtml = "";
+      const optionKeys = ["A", "B", "C", "D", "E"];
+
+      QUESTIONS_DATA.forEach(q => {
+        const selectedOpt = appState.quizAnswers[q.id] || "";
+        const formattedQuestion = q.question.replace(/\n/g, "<br>");
+
+        qHtml += `
+          <div id="question-card-${q.id}" class="bg-white rounded-2xl p-4 sm:p-5 border ${
+            selectedOpt ? "border-indigo-300" : "border-slate-200"
+          } shadow-sm space-y-3.5 transition">
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs font-extrabold">Soal ${q.id}</span>
+                <span class="text-[11px] font-semibold text-slate-500 truncate">${q.topic}</span>
+              </div>
+              <span id="qbadge-${q.id}" class="text-[11px] font-bold ${
+                selectedOpt ? "text-indigo-600" : "text-slate-400"
+              }">
+                ${selectedOpt ? `Terpilih: ${selectedOpt}` : "Belum dijawab"}
+              </span>
+            </div>
+
+            <div class="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+              ${formattedQuestion}
+            </div>
+
+            <div class="space-y-2">
+              ${optionKeys.map(letter => {
+                const isChosen = selectedOpt === letter;
+                return `
+                  <button type="button" onclick="selectQuizOption(${q.id}, '${letter}')"
+                    id="qopt-${q.id}-${letter}"
+                    class="w-full text-left p-3 rounded-xl border transition flex items-start gap-3 ${
+                      isChosen
+                        ? "border-2 border-indigo-600 bg-indigo-50/90 text-indigo-950 shadow-sm"
+                        : "border-slate-200 bg-slate-50/60 hover:bg-slate-100 text-slate-700"
+                    }">
+                    <span class="w-6 h-6 rounded-lg text-xs font-extrabold flex items-center justify-center shrink-0 mt-0.5 ${
+                      isChosen
+                        ? "bg-indigo-600 text-white"
+                        : "bg-white border border-slate-300 text-slate-700"
+                    }">${letter}</span>
+                    <span class="text-xs sm:text-sm leading-relaxed flex-1">${q.options[letter]}</span>
+                  </button>`;
+              }).join("")}
+            </div>
+          </div>`;
+      });
+
+      container.innerHTML = qHtml;
+      updateQuizProgressCounter();
+    }
+
+    function selectQuizOption(questionId, optionLetter) {
+      if (appState.isLocked) {
+        showToast("Jawaban sudah dikunci dan tidak dapat diubah lagi.", "warning");
+        return;
+      }
+
+      appState.quizAnswers[questionId] = optionLetter;
+
+      // Perbarui tampilan opsi pada soal tersebut tanpa re-render seluruh DOM agar sangat responsif
+      const optionKeys = ["A", "B", "C", "D", "E"];
+      optionKeys.forEach(letter => {
+        const btn = document.getElementById(`qopt-${questionId}-${letter}`);
+        if (!btn) return;
+        const isChosen = letter === optionLetter;
+        btn.className = `w-full text-left p-3 rounded-xl border transition flex items-start gap-3 ${
+          isChosen
+            ? "border-2 border-indigo-600 bg-indigo-50/90 text-indigo-950 shadow-sm"
+            : "border-slate-200 bg-slate-50/60 hover:bg-slate-100 text-slate-700"
+        }`;
+        const badgeSpan = btn.querySelector("span:first-child");
+        if (badgeSpan) {
+          badgeSpan.className = `w-6 h-6 rounded-lg text-xs font-extrabold flex items-center justify-center shrink-0 mt-0.5 ${
+            isChosen ? "bg-indigo-600 text-white" : "bg-white border border-slate-300 text-slate-700"
+          }`;
+        }
+      });
+
+      const qBadge = document.getElementById(`qbadge-${questionId}`);
+      if (qBadge) {
+        qBadge.textContent = `Terpilih: ${optionLetter}`;
+        qBadge.className = "text-[11px] font-bold text-indigo-600";
+      }
+
+      const navBtn = document.getElementById(`qnav-${questionId}`);
+      if (navBtn) {
+        navBtn.className = "h-8 rounded-lg text-xs font-extrabold border transition bg-indigo-600 text-white border-indigo-600 shadow-sm";
+      }
+
+      const card = document.getElementById(`question-card-${questionId}`);
+      if (card) {
+        card.classList.remove("border-slate-200");
+        card.classList.add("border-indigo-300");
+      }
+
+      updateQuizProgressCounter();
+    }
+
+    function updateQuizProgressCounter() {
+      const answeredCount = Object.keys(appState.quizAnswers).length;
+      const counterEl = document.getElementById("quizAnsweredCounter");
+      if (counterEl) {
+        counterEl.textContent = `Terjawab: ${answeredCount} / 20`;
+      }
+      return answeredCount;
+    }
+
+    function scrollToQuestion(qId) {
+      const el = document.getElementById(`question-card-${qId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    /***************************************************************************
+     * 12. SINTAKS 6: KESIMPULAN & SUBMIT AKHIR E-LKPD
+     ***************************************************************************/
+    function updateConclusionState() {
+      if (appState.isLocked) return;
+      const checkedRadio = document.querySelector('input[name="conclusionHypoConfirm"]:checked');
+      appState.conclusion.hypoConfirm = checkedRadio ? checkedRadio.value : "";
+      appState.conclusion.c1 = document.getElementById("concSelect1").value;
+      appState.conclusion.c2 = document.getElementById("concSelect2").value;
+      appState.conclusion.c3 = document.getElementById("concSelect3").value;
+      appState.conclusion.c4 = document.getElementById("concSelect4").value;
+    }
+
+    function refreshPreSubmitSummary() {
+      const obsDone = updateObservationProgressBadge();
+      const quizDone = updateQuizProgressCounter();
+      document.getElementById("preSubmitObsStatus").textContent = `${obsDone} / 7 Larutan`;
+      document.getElementById("preSubmitQuizStatus").textContent = `${quizDone} / 20 Soal`;
+    }
+
+    function openConfirmSubmitModal() {
+      if (appState.isLocked) {
+        goToStep(7);
+        return;
+      }
+
+      updateConclusionState();
+      const obsDone = updateObservationProgressBadge();
+      const quizDone = updateQuizProgressCounter();
+      const warnBox = document.getElementById("unansweredWarningBox");
+
+      const warnings = [];
+      if (obsDone < 7) warnings.push(`Tabel Pengamatan baru terisi ${obsDone} dari 7 larutan.`);
+      if (quizDone < 20) warnings.push(`Soal Evaluasi Pilihan Ganda baru terjawab ${quizDone} dari 20 soal.`);
+      if (!appState.conclusion.hypoConfirm || !appState.conclusion.c1 || !appState.conclusion.c2) {
+        warnings.push("Bagian kesimpulan terbimbing pada Sintaks 6 belum dilengkapi seluruhnya.");
+      }
+
+      if (warnings.length > 0) {
+        warnBox.classList.remove("hidden");
+        warnBox.innerHTML = `<div class="font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Perhatian:</div><ul class="list-disc pl-4 space-y-0.5">${warnings.map(w => `<li>${w}</li>`).join("")}</ul>`;
+      } else {
+        warnBox.classList.add("hidden");
+      }
+
+      document.getElementById("confirmSubmitModal").classList.remove("hidden");
+    }
+
+    function closeConfirmSubmitModal() {
+      document.getElementById("confirmSubmitModal").classList.add("hidden");
+    }
+
+    function finalizeAndSubmitLKPD() {
+      closeConfirmSubmitModal();
+      if (appState.isLocked) return;
+
+      // 1. Kunci seluruh jawaban
+      appState.isLocked = true;
+      document.getElementById("lockedBadge").classList.remove("hidden");
+      document.getElementById("pill-7").classList.remove("hidden");
+
+      // Nonaktifkan semua input/select/radio agar tidak dapat diubah lagi
+      document.querySelectorAll("input, select").forEach(el => {
+        if (el.id !== "customWebhookUrlInput") {
+          el.disabled = true;
+        }
+      });
+
+      // 2. Hitung Nilai Akhir Pilihan Ganda (20 Soal -> Skor 0 - 100)
+      let correctCount = 0;
+      QUESTIONS_DATA.forEach(q => {
+        if (appState.quizAnswers[q.id] === q.correctAnswer) {
+          correctCount++;
+        }
+      });
+      const wrongCount = QUESTIONS_DATA.length - correctCount;
+      const finalScore = Math.round((correctCount / QUESTIONS_DATA.length) * 100);
+
+      // 3. Hitung Ketepatan Tabel Pengamatan
+      let correctObsCount = 0;
+      LAB_SOLUTIONS.forEach(sol => {
+        const o = appState.observations[sol.id];
+        if (o.lamp === sol.lamp && o.bubbles === sol.bubbles && o.type === sol.type) {
+          correctObsCount++;
+        }
+      });
+      const obsPercent = Math.round((correctObsCount / LAB_SOLUTIONS.length) * 100);
+
+      // 4. Evaluasi Ketepatan Inkuiri & Kesimpulan
+      const isProblemCorrect = appState.problemChoice === 2;
+      const isHypoCorrect = appState.hypothesisChoice === 2;
+      let concCorrect = 0;
+      if (appState.conclusion.hypoConfirm === "accepted") concCorrect++;
+      if (appState.conclusion.c1 === "sempurna") concCorrect++;
+      if (appState.conclusion.c2 === "sebagian") concCorrect++;
+      if (appState.conclusion.c3 === "lelehan_dan_larutan") concCorrect++;
+      if (appState.conclusion.c4 === "larutan_air") concCorrect++;
+
+      const nowStr = new Date().toLocaleString("id-ID", {
+        dateStyle: "medium",
+        timeStyle: "medium"
+      });
+
+      const payload = {
+        namaLengkap: appState.student.nama,
+        kelas: appState.student.kelas,
+        nomorAbsen: appState.student.absen,
+        waktuSelesai: nowStr,
+        nilaiAkhir: finalScore,
+        jumlahBenar: correctCount,
+        jumlahSalah: wrongCount,
+        skorObservasiPersen: `${obsPercent}% (${correctObsCount}/7)`,
+        statusInkuiri: `Masalah: ${isProblemCorrect ? "Tepat" : "Kurang Tepat"}, Hipotesis: ${isHypoCorrect ? "Tepat" : "Kurang Tepat"}, Kesimpulan: ${concCorrect}/5`,
+        jawabanPG: appState.quizAnswers
+      };
+
+      appState.finalResult = payload;
+
+      // 5. Render Halaman Hasil Akhir & Pembahasan
+      populateFinalResultPage(payload, correctObsCount, concCorrect, isProblemCorrect, isHypoCorrect);
+      goToStep(7);
+
+      // 6. Kirim Otomatis ke Database Google Sheets
+      sendDataToGoogleSheets(payload);
+    }
+
+    function populateFinalResultPage(payload, correctObsCount, concCorrect, isProblemCorrect, isHypoCorrect) {
+      document.getElementById("resultTimestamp").textContent = payload.waktuSelesai;
+      document.getElementById("finalScoreNumber").textContent = payload.nilaiAkhir;
+
+      let predicate = "Perlu Penguatan";
+      if (payload.nilaiAkhir >= 85) predicate = "Sangat Baik (A)";
+      else if (payload.nilaiAkhir >= 75) predicate = "Baik (B)";
+      else if (payload.nilaiAkhir >= 60) predicate = "Cukup (C)";
+
+      document.getElementById("finalPredicateBadge").textContent = `Predikat: ${predicate}`;
+      document.getElementById("resStudentName").textContent = payload.namaLengkap;
+      document.getElementById("resStudentClass").textContent = `${payload.kelas} • Absen ${payload.nomorAbsen}`;
+      document.getElementById("resCorrectCount").textContent = `${payload.jumlahBenar} Soal`;
+      document.getElementById("resWrongCount").textContent = `${payload.jumlahSalah} Soal`;
+
+      document.getElementById("resInquiryScore").textContent =
+        isProblemCorrect && isHypoCorrect ? "Sangat Tepat (2/2)" : isProblemCorrect || isHypoCorrect ? "Cukup Tepat (1/2)" : "Perlu Bimbingan";
+      document.getElementById("resObsAccuracy").textContent = `${correctObsCount}/7 Larutan Tepat`;
+      document.getElementById("resConclusionAccuracy").textContent = `${concCorrect}/5 Poin Tepat`;
+
+      document.getElementById("webhookPayloadPreview").textContent = JSON.stringify(payload, null, 2);
+
+      // Render Pembahasan 20 Soal
+      const reviewContainer = document.getElementById("quizReviewContainer");
+      let revHtml = "";
+      QUESTIONS_DATA.forEach(q => {
+        const studentAns = appState.quizAnswers[q.id] || "Tidak Dijawab";
+        const isCorrect = studentAns === q.correctAnswer;
+
+        revHtml += `
+          <div class="p-3.5 rounded-2xl border ${
+            isCorrect ? "border-emerald-200 bg-emerald-50/40" : "border-rose-200 bg-rose-50/40"
+          } space-y-2 text-xs">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-extrabold text-slate-800">Soal ${q.id} • ${q.topic}</span>
+              <span class="px-2.5 py-0.5 rounded-full font-bold ${
+                isCorrect ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
+              }">
+                ${isCorrect ? '<i class="fa-solid fa-check mr-1"></i>Benar (+5)' : '<i class="fa-solid fa-xmark mr-1"></i>Salah (0)'}
+              </span>
+            </div>
+            <p class="text-slate-700 font-medium leading-relaxed">${q.question.replace(/\n/g, "<br>")}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+              <div class="p-2 rounded-lg bg-white border border-slate-200">
+                <span class="text-slate-400 block text-[10px]">Jawaban Anda:</span>
+                <span class="font-bold ${isCorrect ? "text-emerald-700" : "text-rose-700"}">
+                  ${studentAns} ${q.options[studentAns] ? `- ${q.options[studentAns]}` : ""}
+                </span>
+              </div>
+              <div class="p-2 rounded-lg bg-white border border-emerald-200">
+                <span class="text-slate-400 block text-[10px]">Kunci Jawaban:</span>
+                <span class="font-bold text-emerald-700">
+                  ${q.correctAnswer} - ${q.options[q.correctAnswer]}
+                </span>
+              </div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/80 border border-slate-200 text-slate-600 leading-relaxed">
+              <strong class="text-indigo-700">Pembahasan:</strong> ${q.explanation}
+            </div>
+          </div>`;
+      });
+      reviewContainer.innerHTML = revHtml;
+    }
+
+    /***************************************************************************
+     * 13. PENGIRIMAN DATA OTOMATIS KE GOOGLE SHEETS (FETCH WEBHOOK API)
+     ***************************************************************************/
+    async function sendDataToGoogleSheets(payload) {
+      const iconBox = document.getElementById("syncIconContainer");
+      const icon = document.getElementById("syncStatusIcon");
+      const subtitle = document.getElementById("syncStatusSubtitle");
+
+      const targetUrl = GOOGLE_SCRIPT_WEB_APP_URL || DEFAULT_GOOGLE_SCRIPT_URL;
+
+      iconBox.className = "w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0";
+      icon.className = "fa-solid fa-spinner fa-spin text-lg";
+      subtitle.textContent = "Sedang mengirim nilai akhir secara otomatis ke database Google Sheets peneliti...";
+
+      try {
+        await fetch(targetUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        iconBox.className = "w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0";
+        icon.className = "fa-solid fa-cloud-check text-lg";
+        subtitle.textContent = "Terkirim Otomatis ke Database Google Sheets Peneliti (Nama, Kelas, Waktu Selesai, & Skor Akhir).";
+        showToast("Nilai berhasil terkirim otomatis ke Google Sheets!", "success");
+      } catch (error) {
+        iconBox.className = "w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0";
+        icon.className = "fa-solid fa-cloud-bolt text-lg";
+        subtitle.textContent = "Gagal menghubungi server Google Sheets. Pastikan koneksi internet aktif lalu tekan Kirim Ulang.";
+        showToast("Gagal mengirim data. Tekan tombol Kirim Ulang.", "error");
+      }
+    }
+
+    function retrySendToGoogleSheets() {
+      if (!appState.finalResult) return;
+      sendDataToGoogleSheets(appState.finalResult);
+    }
+
+    /***************************************************************************
+     * 14. MODAL PANEL PENELITI (GOOGLE APPS SCRIPT & COPY CLIPBOARD)
+     ***************************************************************************/
+    function openResearcherModal() {
+      document.getElementById("customWebhookUrlInput").value = GOOGLE_SCRIPT_WEB_APP_URL;
+      document.getElementById("researcherModal").classList.remove("hidden");
+    }
+
+    function closeResearcherModal() {
+      document.getElementById("researcherModal").classList.add("hidden");
+    }
+
+    function saveCustomWebhookUrl() {
+      const val = document.getElementById("customWebhookUrlInput").value.trim();
+      if (!val) {
+        showToast("Masukkan URL Web App Google Apps Script yang valid.", "warning");
+        return;
+      }
+      GOOGLE_SCRIPT_WEB_APP_URL = val;
+      const fb = document.getElementById("webhookSaveFeedback");
+      fb.classList.remove("hidden");
+      fb.textContent = "✓ URL Webhook Google Apps Script berhasil diterapkan pada sesi ini!";
+      showToast("URL Google Apps Script berhasil diperbarui!", "success");
+
+      if (appState.finalResult) {
+        sendDataToGoogleSheets(appState.finalResult);
+      }
+    }
+
+    function copyAppsScriptCode() {
+      const codeText = document.getElementById("gsCodeBlock").innerText;
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = codeText;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempTextArea);
+
+      const btnText = document.getElementById("copyGsBtnText");
+      btnText.textContent = "Tersalin!";
+      showToast("Kode google_apps_script.gs berhasil disalin ke clipboard!", "success");
+      setTimeout(() => {
+        btnText.textContent = "Salin Kode .gs";
+      }, 2500);
+    }
+
+    /***************************************************************************
+     * 15. INISIALISASI SAAT HALAMAN DIMUAT
+     ***************************************************************************/
+    window.onload = function () {
+      setOrientationDemo("salt");
+      renderLabSolutionButtons();
+      updateLabSimulatorUI();
+      renderObservationTable();
+      renderQuizSection();
+    };
+  </script>
+</body>
+</html>
